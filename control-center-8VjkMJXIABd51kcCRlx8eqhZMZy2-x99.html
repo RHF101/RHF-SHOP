@@ -3,68 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF CORE V6 • FIX DEPLOY</title>
+    <title>RHF CORE V8 • AI COMMAND CENTER</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --gold: #d4af37; --dark: #050505; --card: #0f0f0f; --border: #1a1a1a; --danger: #ff3e3e; }
-        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
-        
-        #gate-keeper {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark); z-index: 10000; display: flex; align-items: center; justify-content: center;
+        :root {
+            --gold: #d4af37; --blue: #0088ff; --dark: #050505;
+            --card: #0f0f0f; --border: #1a1a1a; --success: #00ffa3; --danger: #ff3e3e; --ai-glow: #00f2ff;
         }
-        .terminal-box { background: var(--card); border: 2px solid var(--border); padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
 
-        #main-ui { display: none; }
-        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        body { 
+            background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- AI ASSISTANT FLOAT --- */
+        #ai-terminal {
+            background: #000; border: 1px solid var(--ai-glow); border-radius: 15px;
+            padding: 15px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        #main-ui { display: none; padding: 15px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media(min-width: 1000px) { .grid-layout { grid-template-columns: 450px 1fr; } }
+
+        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        h2 { font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; }
+
         input, select, textarea { 
             background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; 
             color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono';
         }
+
         .btn-push { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: 900; width: 100%; cursor: pointer; }
-        
-        .p-item { display: flex; align-items: center; background: #000; padding: 10px; border-radius: 10px; margin-bottom: 5px; border: 1px solid #111; }
-        .p-img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; margin-right: 10px; }
+        .btn-ai { background: var(--ai-glow); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; }
+
+        /* Transaction List */
+        .trx-card { background: #000; border: 1px solid #111; padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 0.75rem; }
+        .status-pending { color: var(--gold); }
+        .status-success { color: var(--success); }
+
+        #gate-keeper { position: fixed; inset: 0; background: var(--dark); z-index: 1000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="gate-keeper">
-        <div class="terminal-box">
-            <h2 style="color:var(--gold)">RHF ACCESS</h2>
-            <input type="text" id="user-core" placeholder="USER">
-            <input type="password" id="pass-core" placeholder="PASSWORD">
-            <button class="btn-push" onclick="login()">ENTER SYSTEM</button>
+        <div style="text-align:center; width: 300px;">
+            <h1 style="color:var(--gold)">RHF ACCESS</h1>
+            <input type="password" id="sys-pass" placeholder="PASSWORD CORE">
+            <button class="btn-push" onclick="authSys()">ENTER</button>
         </div>
     </div>
 
     <div id="main-ui">
-        <div class="widget">
-            <h2 style="color:var(--gold); font-size: 1rem;">UPLOAD DAGANGAN</h2>
-            <input type="text" id="p-name" placeholder="Nama Barang">
-            <input type="number" id="p-price" placeholder="Harga (Angka)">
-            <input type="text" id="p-img" placeholder="URL Gambar">
-            <textarea id="p-desc" placeholder="Deskripsi Barang" style="height:80px;"></textarea>
-            <select id="p-label">
-                <option value="Biasa">Biasa</option>
-                <option value="Premium">Premium</option>
-                <option value="Limited">Limited</option>
-            </select>
-            <button class="btn-push" onclick="pushToShop()">UPLOAD SEKARANG</button>
+        <div id="ai-terminal">
+            <h2 style="color: var(--ai-glow); margin: 0 0 10px 0;">RHF-AI COMMANDER</h2>
+            <p id="ai-response" style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">Menunggu perintah, Arsitek...</p>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="ai-input" placeholder="Contoh: 'Buat deskripsi script bot' atau 'Diskon semua 10%'" style="margin-bottom: 0;">
+                <button class="btn-ai" onclick="runAI()">EXECUTE</button>
+            </div>
         </div>
 
-        <div class="widget">
-            <h2 style="color:var(--gold); font-size: 1rem;">GUDANG (LIVE)</h2>
-            <div id="warehouse">Loading data...</div>
+        <div class="grid-layout">
+            <div class="left">
+                <div class="widget">
+                    <h2>Deploy Asset</h2>
+                    <input type="text" id="p-name" placeholder="Nama Barang">
+                    <input type="number" id="p-price" placeholder="Harga">
+                    <input type="number" id="p-stock" placeholder="Stok">
+                    <input type="text" id="p-img" placeholder="Link Gambar">
+                    <textarea id="p-desc" placeholder="Deskripsi"></textarea>
+                    <select id="p-label">
+                        <option value="Biasa">Biasa</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Limited">Limited</option>
+                    </select>
+                    <button class="btn-push" onclick="pushData()">DEPLOY PRODUCT</button>
+                </div>
+
+                <div class="widget">
+                    <h2>Auto-Verify System</h2>
+                    <p style="font-size: 0.6rem; color: #555;">Masukkan nominal dari mutasi dana untuk verifikasi otomatis.</p>
+                    <input type="number" id="verify-amount" placeholder="Nominal Transfer">
+                    <button class="btn-push" style="background: var(--success); color: #000;" onclick="autoVerify()">VERIFY NOMINAL</button>
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="widget">
+                    <h2>Live Inventory & Stock</h2>
+                    <div id="warehouse-list"></div>
+                </div>
+
+                <div class="widget">
+                    <h2>Pending Transactions</h2>
+                    <div id="transaction-list"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // CONFIG HARUS SAMA PERSIS DENGAN SHOP
         const firebaseConfig = {
             apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
             databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -73,65 +117,101 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function login() {
-            const u = document.getElementById('user-core').value;
-            const p = document.getElementById('pass-core').value;
-            if(u === "RHF STORZ" && p === "gacoruncek73@gmail.com") {
+        function authSys() {
+            if(document.getElementById('sys-pass').value === "gacoruncek73@gmail.com") {
                 document.getElementById('gate-keeper').style.display = 'none';
                 document.getElementById('main-ui').style.display = 'block';
-                loadWarehouse();
-            } else { alert("Salah!"); }
+                loadData();
+            }
         }
 
-        function pushToShop() {
-            const name = document.getElementById('p-name').value;
-            const price = parseInt(document.getElementById('p-price').value);
-            const img = document.getElementById('p-img').value;
-            const desc = document.getElementById('p-desc').value;
-            const label = document.getElementById('p-label').value;
+        // --- AI LOGIC ENGINE ---
+        async function runAI() {
+            const input = document.getElementById('ai-input').value.toLowerCase();
+            const res = document.getElementById('ai-response');
+            res.innerText = "Processing Command...";
 
-            if(!name || !price) return alert("Nama & Harga Wajib!");
+            // Fitur AI 1: Pembuat Deskripsi
+            if(input.includes("buat deskripsi")) {
+                const pName = document.getElementById('p-name').value || "Produk";
+                const aiDesc = `[RHF PREMIUM ASSET] ${pName} - High Performance Script. Teruji stabil, fitur anti-delay, dan integrasi API yang mulus. Cocok untuk arsitektur sistem modern.`;
+                document.getElementById('p-desc').value = aiDesc;
+                res.innerText = "AI: Deskripsi profesional telah dibuat untuk " + pName;
+            }
+            
+            // Fitur AI 2: Diskon Massal
+            else if(input.includes("diskon")) {
+                const pct = parseInt(input.replace(/[^0-9]/g, '')) / 100;
+                if(!pct) return res.innerText = "AI: Masukkan angka diskon (contoh: diskon 10)";
+                
+                db.ref('products').once('value', snap => {
+                    snap.forEach(child => {
+                        const newPrice = Math.round(child.val().price * (1 - pct));
+                        db.ref('products/' + child.key).update({ price: newPrice });
+                    });
+                });
+                res.innerText = `AI: Berhasil menerapkan diskon ${pct*100}% ke semua produk!`;
+            }
+            else {
+                res.innerText = "AI: Maaf Arsitek, perintah tidak dikenali. Coba 'buat deskripsi' atau 'diskon'.";
+            }
+        }
 
-            // Kita pakai .push() agar Firebase otomatis membuat ID unik yang benar
-            const productRef = db.ref('products').push();
-            productRef.set({
-                id: productRef.key, // ID otomatis dari Firebase
-                name: name,
-                price: price,
-                image: img || "https://via.placeholder.com/150",
-                desc: desc || "-",
-                label: label,
+        function pushData() {
+            const data = {
+                name: document.getElementById('p-name').value,
+                price: parseInt(document.getElementById('p-price').value),
+                stock: parseInt(document.getElementById('p-stock').value),
+                image: document.getElementById('p-img').value || "https://via.placeholder.com/150",
+                desc: document.getElementById('p-desc').value,
+                label: document.getElementById('p-label').value,
                 timestamp: Date.now()
-            }).then(() => {
-                alert("BERHASIL TERPASANG DI SHOP!");
-                document.getElementById('p-name').value = '';
-                document.getElementById('p-price').value = '';
-            }).catch(e => alert("Gagal: " + e));
+            };
+            const newRef = db.ref('products').push();
+            newRef.set({...data, id: newRef.key}).then(() => alert("DEPLY SUCCESS"));
         }
 
-        function loadWarehouse() {
+        function loadData() {
+            // Warehouse Load
             db.ref('products').on('value', snap => {
-                const area = document.getElementById('warehouse');
-                area.innerHTML = '';
-                if(!snap.exists()) { area.innerHTML = "Kosong."; return; }
+                const list = document.getElementById('warehouse-list');
+                list.innerHTML = '';
+                snap.forEach(c => {
+                    const p = c.val();
+                    list.innerHTML += `
+                        <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>${p.name} (Stok: ${p.stock})</span>
+                            <button onclick="db.ref('products/${c.key}').remove()" style="color:red; background:none; border:none;">Hapus</button>
+                        </div>`;
+                });
+            });
 
-                snap.forEach(child => {
-                    const p = child.val();
-                    area.innerHTML += `
-                        <div class="p-item">
-                            <img src="${p.image}" class="p-img">
-                            <div style="flex:1">
-                                <b style="font-size:0.8rem">${p.name}</b><br>
-                                <small style="color:var(--gold)">Rp ${p.price.toLocaleString()}</small>
-                            </div>
-                            <button onclick="hapus('${child.key}')" style="background:none; border:none; color:var(--danger); font-weight:bold;">✕</button>
-                        </div>
-                    `;
+            // Transaction Load
+            db.ref('transactions').on('value', snap => {
+                const list = document.getElementById('transaction-list');
+                list.innerHTML = '';
+                snap.forEach(c => {
+                    const t = c.val();
+                    list.innerHTML += `
+                        <div class="trx-card">
+                            <b>${t.userName}</b> - ${t.productName} <br>
+                            <span class="status-${t.status.toLowerCase()}">Rp ${t.total.toLocaleString()} (${t.status})</span>
+                        </div>`;
                 });
             });
         }
 
-        function hapus(id) { if(confirm("Hapus?")) db.ref('products/' + id).remove(); }
+        function autoVerify() {
+            const amount = parseInt(document.getElementById('verify-amount').value);
+            db.ref('transactions').once('value', snap => {
+                snap.forEach(c => {
+                    if(c.val().total === amount && c.val().status === 'Pending') {
+                        db.ref('transactions/' + c.key).update({ status: 'Success' });
+                        alert("Berhasil Konfirmasi Transaksi: " + c.key);
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>
