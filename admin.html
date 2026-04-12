@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard • RHF STORZ</title>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #d4af37;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --dark: #0a0a0a;
+            --card: #151515;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 20px;
+        }
+
+        .header h1 { color: var(--gold); margin: 0; font-size: 1.5rem; }
+
+        /* Stats Card */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            text-align: center;
+        }
+
+        .stat-box h2 { font-size: 1.8rem; margin: 10px 0; color: var(--gold); }
+
+        /* Table Style */
+        .table-container {
+            background: var(--card);
+            border-radius: 15px;
+            overflow-x: auto;
+            border: 1px solid #222;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: #1f1f1f;
+            color: #888;
+            text-align: left;
+            padding: 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+            font-size: 0.9rem;
+        }
+
+        .status {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .status-pending { background: #f39c12; color: #000; }
+        .status-success { background: var(--success); color: #fff; }
+        .status-failed { background: var(--danger); color: #fff; }
+
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+
+        .btn-confirm { background: var(--success); color: #fff; }
+        .btn-reject { background: var(--danger); color: #fff; }
+
+        #admin-lock {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="admin-lock">
+        <h1 style="color: var(--gold);">RESTRICTED AREA</h1>
+        <p>Memverifikasi Autentikasi Arsitek...</p>
+    </div>
+
+    <div class="header">
+        <h1>RHF STORZ ADMIN</h1>
+        <div id="admin-profile"></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <span>Total Transaksi</span>
+            <h2 id="total-trx">0</h2>
+        </div>
+        <div class="stat-box">
+            <span>Menunggu Konfirmasi</span>
+            <h2 id="pending-trx" style="color: #f39c12;">0</h2>
+        </div>
+        <div class="stat-box">
+            <span>Total Pendapatan</span>
+            <h2 id="total-revenue">Rp 0</h2>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Pembeli</th>
+                    <th>Produk</th>
+                    <th>Total (Kode Unik)</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-list">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
+            authDomain: "rhf-shop.firebaseapp.com",
+            databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "rhf-shop",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // --- PROTEKSI HALALAN ADMIN ---
+        // Ganti UID_KAMU_DISINI dengan UID Firebase kamu agar orang lain tidak bisa buka
+        const ADMIN_UID = "UID_FIREBASE_KAMU"; 
+
+        auth.onAuthStateChanged(user => {
+            if (user && user.uid === ADMIN_UID) {
+                document.getElementById('admin-lock').style.display = 'none';
+                document.getElementById('admin-profile').innerText = user.displayName;
+                listenTransactions();
+            } else if (user) {
+                alert("Akses Ditolak. Anda bukan Admin.");
+                window.location.replace("shop.html");
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+
+        // --- LOAD TRANSAKSI ---
+        function listenTransactions() {
+            db.ref('transactions').on('value', snapshot => {
+                const trxs = snapshot.val();
+                const list = document.getElementById('transaction-list');
+                list.innerHTML = '';
+
+                let totalCount = 0;
+                let pendingCount = 0;
+                let revenue = 0;
+
+                for (let id in trxs) {
+                    const t = trxs[id];
+                    totalCount++;
+                    if (t.status === 'Pending') pendingCount++;
+                    if (t.status === 'Success') revenue += t.total;
+
+                    list.innerHTML += `
+                        <tr>
+                            <td>${t.date || '-'}</td>
+                            <td>${t.userName}<br><small style="color:#555">${t.userEmail}</small></td>
+                            <td>${t.productName}</td>
+                            <td>Rp ${t.total.toLocaleString()}</td>
+                            <td><span class="status status-${t.status.toLowerCase()}">${t.status}</span></td>
+                            <td>
+                                ${t.status === 'Pending' ? `
+                                    <button class="btn-action btn-confirm" onclick="updateStatus('${id}', 'Success', '${t.userUid}', '${t.productId}')">Confirm</button>
+                                    <button class="btn-action btn-reject" onclick="updateStatus('${id}', 'Failed')">Reject</button>
+                                ` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById('total-trx').innerText = totalCount;
+                document.getElementById('pending-trx').innerText = pendingCount;
+                document.getElementById('total-revenue').innerText = "Rp " + revenue.toLocaleString();
+            });
+        }
+
+        // --- UPDATE STATUS ---
+        function updateStatus(trxId, newStatus, userUid, productId) {
+            if (confirm(`Ubah status transaksi ke ${newStatus}?`)) {
+                db.ref('transactions/' + trxId).update({ status: newStatus })
+                .then(() => {
+                    if (newStatus === 'Success') {
+                        // Tambahkan ke histori user agar bisa beri rating
+                        db.ref('users/' + userUid + '/history/' + productId).set(true);
+                        alert("Transaksi Berhasil Dikonfirmasi!");
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
 
