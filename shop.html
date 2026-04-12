@@ -3,218 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace • RHF STORZ</title>
+    <title>RHF STORZ - High Performance Shop</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --gold: #d4af37;
-            --dark: #0a0a0a;
-            --card: #141414;
-            --border: #222;
-            --danger: #ff4d4d;
+            --gold: #d4af37; --dark: #050505; --card: #0f0f0f; --border: #1a1a1a;
         }
-
-        body {
-            background: var(--dark);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding-bottom: 80px;
-        }
-
-        /* Navbar */
-        nav {
-            padding: 15px 5%;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10,10,10,0.8);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: rgba(255, 77, 77, 0.1);
-        }
-
-        /* Struk & Tracking Section */
-        .tracking-card {
-            background: var(--card);
-            border: 2px dashed var(--gold);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .receipt-body {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.8rem;
-            border-bottom: 1px dashed #333;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .track-steps { display: flex; justify-content: space-between; position: relative; margin: 20px 0 10px; }
-        .step { flex: 1; text-align: center; z-index: 2; }
-        .dot { width: 12px; height: 12px; background: #333; border-radius: 50%; margin: 0 auto 8px; transition: 0.3s; }
-        .step span { font-size: 0.6rem; color: #555; font-weight: bold; }
-        .track-line { position: absolute; top: 5px; left: 15%; right: 15%; height: 2px; background: #222; z-index: 1; }
+        body { background: var(--dark); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
         
-        .step.active .dot { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
-        .step.active span { color: #fff; }
-
-        /* Chips Filter */
-        .filter-container {
-            display: flex;
-            gap: 10px;
-            padding: 15px 20px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .chip {
-            padding: 10px 20px;
-            background: #1a1a1a;
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            color: #fff;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-
-        /* WARNANYA BERUBAH KUNING SAAT AKTIF */
-        .chip.active {
-            background: var(--gold) !important;
-            color: #000 !important;
-            font-weight: bold;
-            border-color: var(--gold);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
         /* Grid Produk */
-        .product-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 15px; 
-            padding: 20px; 
+        #shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Kolom untuk HP */
+            gap: 12px;
         }
 
-        .product-card { 
-            background: var(--card); 
-            border: 1px solid var(--border); 
-            border-radius: 12px; 
-            padding: 12px; 
-            position: relative; 
-            transition: 0.3s;
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        .label-tag { 
-            position: absolute; 
-            top: 8px; 
-            left: 8px; 
-            font-size: 0.55rem; 
-            padding: 3px 6px; 
-            border-radius: 4px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            z-index: 5; 
+        .img-product {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #000;
         }
 
+        .label-tag {
+            position: absolute; top: 5px; left: 5px;
+            font-size: 0.6rem; font-weight: bold; padding: 3px 8px;
+            border-radius: 5px; color: #000;
+        }
+        .tag-limited { background: #ff3e3e; color: #fff; }
+        .tag-premium { background: var(--gold); }
         .tag-biasa { background: #444; color: #fff; }
-        .tag-menengah { background: #2980b9; color: #fff; }
-        .tag-premium { background: var(--gold); color: #000; }
-        .tag-limited { background: #c0392b; color: #fff; }
 
-        .btn-buy { 
-            width: 100%; 
-            background: var(--gold); 
-            border: none; 
-            padding: 10px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            margin-top: 10px; 
-            cursor: pointer; 
-            color: #000;
+        .product-title { font-size: 0.85rem; margin: 10px 0 5px; font-weight: bold; }
+        
+        .product-desc { 
+            font-size: 0.65rem; color: #666; 
+            height: 32px; overflow: hidden; margin-bottom: 8px;
+            line-height: 1.2;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .product-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
+
+        .btn-buy {
+            background: var(--gold); border: none; padding: 8px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div style="color: var(--gold); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">RHF STORZ</div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span id="user-display" style="font-size: 0.75rem; color: #888;"></span>
-            <button class="btn-logout" onclick="logoutSession()">Logout</button>
-        </div>
-    </nav>
-
-    <div id="tracking-container" style="display: none;">
-        <div class="tracking-card">
-            <h4 style="text-align: center; margin-top: 0; color: var(--gold); font-size: 0.9rem;">🧾 STRUK PEMBAYARAN</h4>
-            <div id="receipt-content" class="receipt-body">
-                </div>
-            <div class="track-steps">
-                <div class="track-line"></div>
-                <div class="step" id="s1"><div class="dot"></div><span>PROSES</span></div>
-                <div class="step" id="s2"><div class="dot"></div><span>SEGERA</span></div>
-                <div class="step" id="s3"><div class="dot"></div><span>SELESAI</span></div>
-            </div>
-            <p id="track-msg" style="font-size: 0.7rem; text-align: center; color: #888; margin-bottom: 0;"></p>
-        </div>
+    <div class="header">
+        <h1 style="font-size: 1.2rem; color: var(--gold);">RHF STORZ</h1>
+        <div id="user-info" style="font-size: 0.8rem;">Loading...</div>
     </div>
 
-    <div class="filter-container">
-        <div class="chip active" onclick="filterData('All', this)">Semua</div>
-        <div class="chip" onclick="filterData('Biasa', this)">Biasa</div>
-        <div class="chip" onclick="filterData('Menengah', this)">Menengah</div>
-        <div class="chip" onclick="filterData('Premium', this)">Premium</div>
-        <div class="chip" onclick="filterData('Limited', this)">Limited</div>
-    </div>
-
-    <div id="shop-grid" class="product-grid">
+    <div id="shop-grid">
         </div>
-
-    <div id="admin-gate"></div>
-
-    <script src="js/firebase-config.js"></script>
-    <script src="js/shop.js"></script>
 
     <script>
-        // Logika Logout yang sudah diperbaiki
-        function logoutSession() {
-            if (confirm("Keluar dari RHF STORZ?")) {
-                firebase.auth().signOut().then(() => {
-                    window.location.replace("index.html");
-                }).catch((error) => {
-                    alert("Gagal Logout: " + error.message);
+        // --- 1. CONFIG FIREBASE (WAJIB SAMA DENGAN ADMIN) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
+            authDomain: "rhf-shop.firebaseapp.com",
+            databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "rhf-shop",
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // --- 2. CEK LOGIN ---
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('user-info').innerText = "Arsitek: " + user.displayName;
+                loadProducts();
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+
+        // --- 3. AMBIL DATA DARI DATABASE ---
+        function loadProducts() {
+            db.ref('products').on('value', snap => {
+                const grid = document.getElementById('shop-grid');
+                grid.innerHTML = '';
+                const data = snap.val();
+                const now = Date.now();
+
+                if (!data) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Barang belum di-upload arsitek.</p>';
+                    return;
+                }
+
+                Object.keys(data).forEach(key => {
+                    const p = data[key];
+
+                    // Cek Expired (Jika Limited)
+                    if (p.expiryAt && now > p.expiryAt) {
+                        return; // Jangan tampilkan jika sudah habis waktunya
+                    }
+
+                    const cleanDesc = p.desc ? p.desc.substring(0, 40) + "..." : "No description.";
+
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <div class="label-tag tag-${p.label.toLowerCase()}">${p.label}</div>
+                            <img src="${p.image}" class="img-product" onerror="this.src='https://via.placeholder.com/150?text=RHF'">
+                            <h4 class="product-title">${p.name}</h4>
+                            <div class="product-desc">${cleanDesc}</div>
+                            <p class="product-price">Rp ${p.price.toLocaleString()}</p>
+                            <button class="btn-buy" onclick="buy('${p.id}', '${p.name}', ${p.price})">BELI</button>
+                        </div>
+                    `;
                 });
+            });
+        }
+
+        function buy(id, name, price) {
+            const code = Math.floor(Math.random() * 899) + 100;
+            const total = price + code;
+            if (confirm(`Beli ${name}?\nTotal Transfer: Rp ${total.toLocaleString()}`)) {
+                const tid = "RHF" + Date.now().toString().slice(-4);
+                db.ref('transactions/' + tid).set({
+                    userName: auth.currentUser.displayName,
+                    productName: name,
+                    total: total,
+                    uniqueCode: code,
+                    status: 'Pending'
+                }).then(() => alert("Pesanan Masuk! Tunggu Verifikasi."));
             }
         }
     </script>
