@@ -3,124 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF CORE V5 • ARCHITECT SYSTEM</title>
+    <title>RHF CORE V6 • FIX DEPLOY</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --gold: #d4af37; --blue: #0088ff; --dark: #050505;
-            --card: #0f0f0f; --border: #1a1a1a; --success: #00ffa3; --danger: #ff3e3e;
-        }
-
-        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; }
+        :root { --gold: #d4af37; --dark: #050505; --card: #0f0f0f; --border: #1a1a1a; --danger: #ff3e3e; }
+        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
         
-        /* LOGIN GATE */
         #gate-keeper {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark); z-index: 10000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--dark); z-index: 10000; display: flex; align-items: center; justify-content: center;
         }
+        .terminal-box { background: var(--card); border: 2px solid var(--border); padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
 
-        .terminal-box {
-            background: var(--card); border: 2px solid var(--border);
-            padding: 30px; border-radius: 24px; width: 85%; max-width: 400px; text-align: center;
-        }
-
-        /* MAIN UI */
-        #main-ui { display: none; padding: 15px; }
-        .header-panel { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media(min-width: 950px) { .grid-layout { grid-template-columns: 400px 1fr; } }
-
-        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        h2 { font-size: 0.75rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 0 0 20px; }
-
+        #main-ui { display: none; }
+        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
         input, select, textarea { 
-            background: #000; border: 1px solid var(--border); padding: 14px; 
-            border-radius: 12px; color: #fff; width: 100%; box-sizing: border-box; 
-            font-family: 'JetBrains Mono', monospace; outline: none; transition: 0.3s; margin-bottom: 12px;
+            background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; 
+            color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono';
         }
-        textarea { height: 100px; resize: none; }
-        input:focus, textarea:focus { border-color: var(--gold); }
-
-        .btn-core { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; }
-
-        /* LISTS */
-        .p-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: #000; border-radius: 12px; margin-bottom: 8px; border: 1px solid #111; }
-        .p-thumb { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
+        .btn-push { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: 900; width: 100%; cursor: pointer; }
         
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 12px; color: #444; font-size: 0.6rem; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid #111; font-size: 0.8rem; }
+        .p-item { display: flex; align-items: center; background: #000; padding: 10px; border-radius: 10px; margin-bottom: 5px; border: 1px solid #111; }
+        .p-img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div id="gate-keeper">
         <div class="terminal-box">
-            <h1 style="font-weight:900;">RHF STORZ</h1>
-            <p style="color: #444; font-size: 0.65rem; margin-bottom: 20px;">SYSTEM OVERRIDE V5.0</p>
+            <h2 style="color:var(--gold)">RHF ACCESS</h2>
             <input type="text" id="user-core" placeholder="USER">
             <input type="password" id="pass-core" placeholder="PASSWORD">
-            <button class="btn-core" onclick="verifyAccess()">AUTHORIZE</button>
+            <button class="btn-push" onclick="login()">ENTER SYSTEM</button>
         </div>
     </div>
 
     <div id="main-ui">
-        <div class="header-panel">
-            <h1 style="margin:0; font-size: 1.1rem; font-weight: 900;">ADMIN PANEL</h1>
-            <button onclick="exitSystem()" style="background:none; border: 1px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 12px; cursor: pointer;">EXIT</button>
+        <div class="widget">
+            <h2 style="color:var(--gold); font-size: 1rem;">UPLOAD DAGANGAN</h2>
+            <input type="text" id="p-name" placeholder="Nama Barang">
+            <input type="number" id="p-price" placeholder="Harga (Angka)">
+            <input type="text" id="p-img" placeholder="URL Gambar">
+            <textarea id="p-desc" placeholder="Deskripsi Barang" style="height:80px;"></textarea>
+            <select id="p-label">
+                <option value="Biasa">Biasa</option>
+                <option value="Premium">Premium</option>
+                <option value="Limited">Limited</option>
+            </select>
+            <button class="btn-push" onclick="pushToShop()">UPLOAD SEKARANG</button>
         </div>
 
-        <div class="grid-layout">
-            <div class="col-left">
-                <div class="widget">
-                    <h2>Deploy Product</h2>
-                    <input type="text" id="p-name" placeholder="Nama Produk">
-                    <input type="number" id="p-price" placeholder="Harga (Rp)">
-                    <input type="text" id="p-img" placeholder="Link Gambar">
-                    
-                    <textarea id="p-desc" placeholder="Deskripsi Produk (Gunakan baris baru untuk list fitur)"></textarea>
-                    
-                    <select id="p-label" onchange="toggleLimitInput()">
-                        <option value="Biasa">Biasa</option>
-                        <option value="Menengah">Menengah</option>
-                        <option value="Premium">Premium</option>
-                        <option value="Limited">Limited</option>
-                    </select>
-
-                    <div id="limit-box" style="display:none;">
-                        <label style="font-size:0.6rem; color:var(--gold);">BARANG HILANG DALAM (MENIT):</label>
-                        <input type="number" id="p-expiry" placeholder="Contoh: 60 (1 Jam)">
-                    </div>
-
-                    <button class="btn-core" onclick="pushProduct()">DEPLOY TO DATABASE</button>
-                </div>
-
-                <div class="widget">
-                    <h2>Active Warehouse</h2>
-                    <div id="inventory-list"></div>
-                </div>
-            </div>
-
-            <div class="col-right">
-                <div class="widget">
-                    <h2>Live Transactions</h2>
-                    <div style="overflow-x:auto;">
-                        <table>
-                            <thead><tr><th>Client</th><th>Item</th><th>Nominal</th><th>Status</th><th>Action</th></tr></thead>
-                            <tbody id="trx-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div class="widget">
+            <h2 style="color:var(--gold); font-size: 1rem;">GUDANG (LIVE)</h2>
+            <div id="warehouse">Loading data...</div>
         </div>
     </div>
 
     <script>
+        // CONFIG HARUS SAMA PERSIS DENGAN SHOP
         const firebaseConfig = {
             apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
             databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -129,107 +73,65 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function verifyAccess() {
+        function login() {
             const u = document.getElementById('user-core').value;
             const p = document.getElementById('pass-core').value;
             if(u === "RHF STORZ" && p === "gacoruncek73@gmail.com") {
-                sessionStorage.setItem("rhf_auth", "gacor_v5");
-                bootSystem();
-            } else { alert("WRONG CREDENTIALS!"); }
-        }
-
-        function bootSystem() {
-            if(sessionStorage.getItem("rhf_auth") === "gacor_v5") {
                 document.getElementById('gate-keeper').style.display = 'none';
                 document.getElementById('main-ui').style.display = 'block';
-                syncInventory();
-                syncTransactions();
-            }
-        }
-        if(sessionStorage.getItem("rhf_auth") === "gacor_v5") bootSystem();
-
-        function toggleLimitInput() {
-            const label = document.getElementById('p-label').value;
-            document.getElementById('limit-box').style.display = (label === 'Limited') ? 'block' : 'none';
+                loadWarehouse();
+            } else { alert("Salah!"); }
         }
 
-        function pushProduct() {
+        function pushToShop() {
             const name = document.getElementById('p-name').value;
             const price = parseInt(document.getElementById('p-price').value);
             const img = document.getElementById('p-img').value;
             const desc = document.getElementById('p-desc').value;
             const label = document.getElementById('p-label').value;
-            const expiryMin = parseInt(document.getElementById('p-expiry').value);
 
-            if(!name || !price) return alert("DATA MINIMAL NAMA & HARGA!");
+            if(!name || !price) return alert("Nama & Harga Wajib!");
 
-            const pid = "P" + Date.now();
-            const data = {
-                id: pid, name, price, image: img, desc, label,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            // Jika Limited, hitung waktu selesainya
-            if(label === 'Limited' && expiryMin > 0) {
-                data.expiryAt = Date.now() + (expiryMin * 60000);
-            }
-
-            db.ref('products/' + pid).set(data).then(() => {
-                alert("PRODUCT DEPLOYED!");
-                location.reload();
-            });
+            // Kita pakai .push() agar Firebase otomatis membuat ID unik yang benar
+            const productRef = db.ref('products').push();
+            productRef.set({
+                id: productRef.key, // ID otomatis dari Firebase
+                name: name,
+                price: price,
+                image: img || "https://via.placeholder.com/150",
+                desc: desc || "-",
+                label: label,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("BERHASIL TERPASANG DI SHOP!");
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+            }).catch(e => alert("Gagal: " + e));
         }
 
-        function syncInventory() {
+        function loadWarehouse() {
             db.ref('products').on('value', snap => {
-                const list = document.getElementById('inventory-list');
-                list.innerHTML = '';
-                const now = Date.now();
-                
+                const area = document.getElementById('warehouse');
+                area.innerHTML = '';
+                if(!snap.exists()) { area.innerHTML = "Kosong."; return; }
+
                 snap.forEach(child => {
                     const p = child.val();
-                    
-                    // AUTO-CLEANUP: Hapus jika expired
-                    if(p.expiryAt && now > p.expiryAt) {
-                        db.ref('products/' + child.key).remove();
-                        return;
-                    }
-
-                    list.innerHTML += `
-                        <div class="p-row">
-                            <img src="${p.image}" class="p-thumb" onerror="this.src='https://via.placeholder.com/50'">
+                    area.innerHTML += `
+                        <div class="p-item">
+                            <img src="${p.image}" class="p-img">
                             <div style="flex:1">
-                                <div style="font-size:0.75rem; font-weight:bold;">${p.name}</div>
-                                <div style="font-size:0.6rem; color:#555;">${p.label}</div>
+                                <b style="font-size:0.8rem">${p.name}</b><br>
+                                <small style="color:var(--gold)">Rp ${p.price.toLocaleString()}</small>
                             </div>
-                            <button onclick="killProduct('${child.key}')" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
-                        </div>`;
+                            <button onclick="hapus('${child.key}')" style="background:none; border:none; color:var(--danger); font-weight:bold;">✕</button>
+                        </div>
+                    `;
                 });
             });
         }
 
-        function syncTransactions() {
-            db.ref('transactions').on('value', snap => {
-                const body = document.getElementById('trx-body');
-                body.innerHTML = '';
-                snap.forEach(child => {
-                    const t = child.val();
-                    body.innerHTML += `
-                        <tr>
-                            <td>${t.userName}</td>
-                            <td>${t.productName}</td>
-                            <td>Rp ${t.total.toLocaleString()}</td>
-                            <td>${t.status}</td>
-                            <td><button onclick="modTrx('${child.key}', 'Success')">✅</button></td>
-                        </tr>`;
-                });
-            });
-        }
-
-        function killProduct(id) { if(confirm("DELETE?")) db.ref('products/' + id).remove(); }
-        function modTrx(id, stat) { db.ref('transactions/' + id).update({ status: stat }); }
-        function exitSystem() { sessionStorage.clear(); location.reload(); }
+        function hapus(id) { if(confirm("Hapus?")) db.ref('products/' + id).remove(); }
     </script>
 </body>
 </html>
-
