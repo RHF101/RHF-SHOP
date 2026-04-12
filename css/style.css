@@ -1,1 +1,261 @@
+/* RHF STORZ - Official Stylesheet
+   Theme: Clean Luxury (Dark & Gold)
+   Architect: Radit Tiya
+*/
 
+:root {
+    --gold: #d4af37;
+    --gold-hover: #f1c40f;
+    --dark-bg: #0a0a0a;
+    --card-bg: #141414;
+    --input-bg: #1a1a1a;
+    --border: #222;
+    --text-main: #ffffff;
+    --text-dim: #a0a0a0;
+    --success: #27ae60;
+    --danger: #e74c3c;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* --- NAVIGATION --- */
+nav {
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 10, 0.8);
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* --- BUTTONS --- */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-gold {
+    background: var(--gold);
+    color: #000;
+}
+
+.btn-gold:hover {
+    background: var(--gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+}
+
+.btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* --- PRODUCT GRID --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* --- PRODUCT CARD --- */
+.p-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.p-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+}
+
+.p-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    filter: grayscale(20%);
+    transition: 0.3s;
+}
+
+.p-card:hover .p-img {
+    filter: grayscale(0%);
+}
+
+.p-content {
+    padding: 20px;
+}
+
+.p-label {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    z-index: 10;
+}
+
+.label-premium { background: var(--gold); color: #000; }
+.label-limited { background: var(--danger); color: #fff; }
+
+.p-name {
+    font-size: 1.15rem;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.p-desc {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    height: 40px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.p-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #222;
+    padding-top: 15px;
+}
+
+.p-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.p-stock {
+    font-size: 0.75rem;
+    color: var(--success);
+}
+
+/* --- FILTER CHIPS --- */
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 5%;
+    scrollbar-width: none;
+}
+
+.chip {
+    padding: 8px 18px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.chip.active {
+    background: var(--gold);
+    color: #000;
+    border-color: var(--gold);
+}
+
+/* --- ADMIN TABLE --- */
+.table-container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    background: #1a1a1a;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* --- UTILS --- */
+.text-gold { color: var(--gold); }
+.mt-20 { margin-top: 20px; }
+.text-center { text-align: center; }
+
+#loader {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--gold);
+    font-weight: bold;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+  }
+  
