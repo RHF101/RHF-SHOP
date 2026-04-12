@@ -18,177 +18,144 @@
             --dark: #0a0a0a;
             --card: #141414;
             --border: #222;
+            --danger: #ff4d4d;
         }
 
-        /* Style Lacak Pesanan (Tracking) */
-        .tracking-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
+        body {
+            background: var(--dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding-bottom: 80px;
         }
 
-        .track-steps {
+        /* Navbar */
+        nav {
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
-            position: relative;
-            margin: 20px 0;
+            align-items: center;
+            background: rgba(10,10,10,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .step {
-            flex: 1;
-            text-align: center;
-            z-index: 2;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            background: #333;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            transition: 0.5s;
-        }
-
-        .step span {
-            font-size: 0.7rem;
-            color: #555;
-            font-weight: 600;
-        }
-
-        /* Garis Progress */
-        .track-line {
-            position: absolute;
-            top: 5px;
-            left: 15%;
-            right: 15%;
-            height: 2px;
-            background: #222;
-            z-index: 1;
-        }
-
-        /* Aktif Status */
-        .step.active .dot {
-            background: var(--gold);
-            box-shadow: 0 0 10px var(--gold);
-        }
-
-        .step.active span {
-            color: #fff;
-        }
-
-        .floating-btn {
-            position: fixed;
-            bottom: 25px;
-            padding: 15px 25px;
-            border-radius: 50px;
-            text-decoration: none;
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
             font-weight: bold;
-            z-index: 9999;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: 0.3s;
         }
+
+        /* Struk & Tracking Section */
+        .tracking-card {
+            background: var(--card);
+            border: 2px dashed var(--gold);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .receipt-body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .track-steps { display: flex; justify-content: space-between; position: relative; margin: 20px 0 10px; }
+        .step { flex: 1; text-align: center; z-index: 2; }
+        .dot { width: 12px; height: 12px; background: #333; border-radius: 50%; margin: 0 auto 8px; transition: 0.3s; }
+        .step span { font-size: 0.6rem; color: #555; font-weight: bold; }
+        .track-line { position: absolute; top: 5px; left: 15%; right: 15%; height: 2px; background: #222; z-index: 1; }
+        
+        .step.active .dot { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .step.active span { color: #fff; }
+
+        /* Chips Filter */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .chip {
+            padding: 8px 18px;
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .chip.active { background: var(--gold); color: #000; font-weight: bold; border-color: var(--gold); }
+
+        /* Grid Produk */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px; }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; position: relative; }
+        
+        .label-tag { position: absolute; top: 8px; left: 8px; font-size: 0.55rem; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; z-index: 5; }
+        .tag-biasa { background: #444; }
+        .tag-menengah { background: #2980b9; }
+        .tag-premium { background: var(--gold); color: #000; }
+        .tag-limited { background: #c0392b; }
+
+        .btn-buy { width: 100%; background: var(--gold); border: none; padding: 10px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <nav style="padding: 15px 5%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: var(--gold); font-weight: bold; letter-spacing: 2px;">RHF STORZ</span>
-        <div id="user-display" style="font-size: 0.8rem; color: #888;"></div>
+    <nav>
+        <div style="color: var(--gold); font-weight: bold; font-size: 1.1rem;">RHF STORZ</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="user-display" style="font-size: 0.7rem; color: #888;"></span>
+            <button class="btn-logout" onclick="logoutSession()">Logout</button>
+        </div>
     </nav>
 
-    <div class="container" style="padding: 20px;">
-        
-        <div id="tracking-container" style="display: none;">
-            <h2 style="font-size: 0.9rem; color: var(--gold); margin-bottom: 15px;">📦 STATUS PESANAN ANDA</h2>
-            <div class="tracking-card">
-                <div class="track-steps">
-                    <div class="track-line"></div>
-                    <div class="step" id="s1">
-                        <div class="dot"></div>
-                        <span>DI PROSES</span>
-                    </div>
-                    <div class="step" id="s2">
-                        <div class="dot"></div>
-                        <span>SEGERA</span>
-                    </div>
-                    <div class="step" id="s3">
-                        <div class="dot"></div>
-                        <span>SELESAI</span>
-                    </div>
+    <div id="tracking-container" style="display: none;">
+        <div class="tracking-card">
+            <h4 style="text-align: center; margin-top: 0; color: var(--gold); font-size: 0.9rem;">🧾 STRUK PEMBAYARAN</h4>
+            <div id="receipt-content" class="receipt-body">
                 </div>
-                <p id="track-msg" style="font-size: 0.75rem; text-align: center; color: #888; margin-top: 10px;"></p>
+            <div class="track-steps">
+                <div class="track-line"></div>
+                <div class="step" id="s1"><div class="dot"></div><span>PROSES</span></div>
+                <div class="step" id="s2"><div class="dot"></div><span>SEGERA</span></div>
+                <div class="step" id="s3"><div class="dot"></div><span>SELESAI</span></div>
             </div>
+            <p id="track-msg" style="font-size: 0.7rem; text-align: center; color: #888; margin-bottom: 0;"></p>
         </div>
-
-        <div class="filter-bar" style="margin-bottom: 20px; display: flex; gap: 10px;">
-            <div class="chip active" onclick="filterData('All', this)">Semua</div>
-            <div class="chip" onclick="filterData('Premium', this)">Premium</div>
-        </div>
-
-        <div id="shop-grid" class="product-grid">
-            </div>
     </div>
 
-    <a href="chat.html" class="floating-btn" style="left: 25px; background: #1a1a1a; border: 1px solid #333; color: #fff; font-size: 0.8rem;">
-        💬 Support
-    </a>
+    <div class="filter-container">
+        <div class="chip active" onclick="filterData('All', this)">Semua</div>
+        <div class="chip" onclick="filterData('Biasa', this)">Biasa</div>
+        <div class="chip" onclick="filterData('Menengah', this)">Menengah</div>
+        <div class="chip" onclick="filterData('Premium', this)">Premium</div>
+        <div class="chip" onclick="filterData('Limited', this)">Limited</div>
+    </div>
+
+    <div id="shop-grid" class="product-grid">
+        </div>
 
     <div id="admin-gate"></div>
 
     <script src="js/firebase-config.js"></script>
     <script src="js/app.js"></script>
     <script src="js/shop.js"></script>
-
-    <script>
-        const ARSITEK_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('user-display').innerText = user.displayName;
-                
-                // Panggil Fitur Lacak
-                checkTracking(user.uid);
-
-                // Cek Akun Arsitek untuk munculkan tombol rahasia
-                if (user.uid === ARSITEK_UID) {
-                    document.getElementById('admin-gate').innerHTML = `
-                        <a href="control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" class="floating-btn" style="right: 25px; background: var(--gold); color: #000;">
-                            ⚙️ ADMIN PANEL
-                        </a>
-                    `;
-                }
-            } else {
-                window.location.replace("/");
-            }
-        });
-
-        function checkTracking(uid) {
-            db.ref('transactions').orderByChild('userUid').equalTo(uid).limitToLast(1).on('value', snap => {
-                if (snap.exists()) {
-                    document.getElementById('tracking-container').style.display = 'block';
-                    const data = Object.values(snap.val())[0];
-                    const msg = document.getElementById('track-msg');
-                    
-                    // Reset Steps
-                    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-
-                    // Logika 3 Tahap
-                    document.getElementById('s1').classList.add('active'); // Tahap 1 Selalu Aktif
-                    msg.innerText = "Menunggu konfirmasi pembayaran...";
-
-                    if (data.status === 'Process' || data.status === 'Success') {
-                        document.getElementById('s2').classList.add('active');
-                        msg.innerText = "Pembayaran valid! Pesanan segera dikirim.";
-                    }
-                    if (data.status === 'Success') {
-                        document.getElementById('s3').classList.add('active');
-                        msg.innerText = "Transaksi Selesai. Terima kasih!";
-                    }
-                }
-            });
-        }
-    </script>
 </body>
 </html>
