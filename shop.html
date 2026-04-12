@@ -3,82 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF STORZ - High Performance Shop</title>
+    <title>RHF STORZ • OFFICIAL SHOP</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --gold: #d4af37; --dark: #050505; --card: #0f0f0f; --border: #1a1a1a;
+            --gold: #d4af37; --dark: #050505; --card: #0f0f0f;
+            --border: #1a1a1a; --text: #ffffff; --text-dim: #888;
         }
-        body { background: var(--dark); color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
+
+        body {
+            background: var(--dark); color: var(--text);
+            font-family: 'Inter', sans-serif; margin: 0; padding: 0;
+            overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Header & User Info */
+        header {
+            padding: 20px 15px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(5,5,5,0.8); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .logo { font-weight: 800; font-size: 1.2rem; color: var(--gold); letter-spacing: -1px; }
+        .user-pill { background: var(--card); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; color: var(--gold); }
+
+        /* Kategori Pemisah (Filter Chips) */
+        .category-container {
+            display: flex; gap: 10px; overflow-x: auto; padding: 15px;
+            scrollbar-width: none;
+        }
+        .category-container::-webkit-scrollbar { display: none; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        /* Grid Produk */
-        #shop-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 Kolom untuk HP */
-            gap: 12px;
+        .chip {
+            background: var(--card); border: 1px solid var(--border);
+            padding: 8px 18px; border-radius: 12px; font-size: 0.75rem;
+            white-space: nowrap; color: var(--text-dim); cursor: pointer; transition: 0.3s;
+        }
+        .chip.active { background: var(--gold); color: #000; font-weight: bold; border-color: var(--gold); }
+
+        /* Shop Grid */
+        .shop-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 12px; padding: 15px;
         }
 
         .product-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 10px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 18px; padding: 12px; position: relative;
+            display: flex; flex-direction: column; transition: 0.3s;
         }
 
-        .img-product {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 10px;
-            background: #000;
-        }
+        .product-card:active { transform: scale(0.97); }
 
-        .label-tag {
-            position: absolute; top: 5px; left: 5px;
-            font-size: 0.6rem; font-weight: bold; padding: 3px 8px;
-            border-radius: 5px; color: #000;
+        .img-wrap { width: 100%; height: 120px; border-radius: 12px; overflow: hidden; background: #000; margin-bottom: 10px; }
+        .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+        .tag {
+            position: absolute; top: 18px; left: 18px; font-size: 0.55rem;
+            font-weight: 800; padding: 3px 8px; border-radius: 6px;
+            text-transform: uppercase; color: #000;
         }
-        .tag-limited { background: #ff3e3e; color: #fff; }
+        .tag-biasa { background: #fff; }
         .tag-premium { background: var(--gold); }
-        .tag-biasa { background: #444; color: #fff; }
+        .tag-limited { background: #ff3e3e; color: #fff; }
 
-        .product-title { font-size: 0.85rem; margin: 10px 0 5px; font-weight: bold; }
-        
-        .product-desc { 
-            font-size: 0.65rem; color: #666; 
-            height: 32px; overflow: hidden; margin-bottom: 8px;
-            line-height: 1.2;
-        }
-
-        .product-price { color: var(--gold); font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
+        .p-title { font-size: 0.85rem; font-weight: 700; margin: 0 0 5px; color: #fff; }
+        .p-desc { font-size: 0.65rem; color: var(--text-dim); height: 32px; overflow: hidden; margin-bottom: 10px; line-height: 1.3; }
+        .p-price { font-size: 0.95rem; font-weight: 800; color: var(--gold); margin-top: auto; }
 
         .btn-buy {
-            background: var(--gold); border: none; padding: 8px;
-            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem;
+            background: #fff; color: #000; border: none; padding: 10px;
+            border-radius: 10px; font-weight: 800; font-size: 0.75rem;
+            margin-top: 10px; cursor: pointer; width: 100%;
         }
+
+        /* Empty State */
+        .empty { grid-column: 1/-1; text-align: center; padding: 50px 0; color: #333; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1 style="font-size: 1.2rem; color: var(--gold);">RHF STORZ</h1>
-        <div id="user-info" style="font-size: 0.8rem;">Loading...</div>
+    <header>
+        <div class="logo">RHF STORZ</div>
+        <div id="user-display" class="user-pill">Menghubungkan...</div>
+    </header>
+
+    <div class="category-container">
+        <div class="chip active" onclick="filterShop('All', this)">Semua</div>
+        <div class="chip" onclick="filterShop('Biasa', this)">Biasa</div>
+        <div class="chip" onclick="filterShop('Premium', this)">Premium</div>
+        <div class="chip" onclick="filterShop('Limited', this)">Limited</div>
     </div>
 
-    <div id="shop-grid">
+    <div class="shop-grid" id="main-grid">
         </div>
 
     <script>
-        // --- 1. CONFIG FIREBASE (WAJIB SAMA DENGAN ADMIN) ---
+        // --- CONFIG FIREBASE (HARUS SAMA DENGAN ADMIN) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
             authDomain: "rhf-shop.firebaseapp.com",
@@ -90,65 +118,90 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // --- 2. CEK LOGIN ---
+        let allProducts = [];
+
+        // 1. Monitor Login
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('user-info').innerText = "Arsitek: " + user.displayName;
-                loadProducts();
+                document.getElementById('user-display').innerText = user.displayName;
+                startShopSync();
             } else {
                 window.location.replace("index.html");
             }
         });
 
-        // --- 3. AMBIL DATA DARI DATABASE ---
-        function loadProducts() {
+        // 2. Ambil Data Real-time (Tabel: products)
+        function startShopSync() {
             db.ref('products').on('value', snap => {
-                const grid = document.getElementById('shop-grid');
-                grid.innerHTML = '';
                 const data = snap.val();
-                const now = Date.now();
-
-                if (!data) {
-                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Barang belum di-upload arsitek.</p>';
-                    return;
+                allProducts = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        allProducts.push({ id: key, ...data[key] });
+                    });
                 }
-
-                Object.keys(data).forEach(key => {
-                    const p = data[key];
-
-                    // Cek Expired (Jika Limited)
-                    if (p.expiryAt && now > p.expiryAt) {
-                        return; // Jangan tampilkan jika sudah habis waktunya
-                    }
-
-                    const cleanDesc = p.desc ? p.desc.substring(0, 40) + "..." : "No description.";
-
-                    grid.innerHTML += `
-                        <div class="product-card">
-                            <div class="label-tag tag-${p.label.toLowerCase()}">${p.label}</div>
-                            <img src="${p.image}" class="img-product" onerror="this.src='https://via.placeholder.com/150?text=RHF'">
-                            <h4 class="product-title">${p.name}</h4>
-                            <div class="product-desc">${cleanDesc}</div>
-                            <p class="product-price">Rp ${p.price.toLocaleString()}</p>
-                            <button class="btn-buy" onclick="buy('${p.id}', '${p.name}', ${p.price})">BELI</button>
-                        </div>
-                    `;
-                });
+                renderProducts(allProducts);
             });
         }
 
-        function buy(id, name, price) {
+        // 3. Render ke UI
+        function renderProducts(list) {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = '';
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="empty">Belum ada barang di rak.</div>';
+                return;
+            }
+
+            list.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div class="tag tag-${p.label.toLowerCase()}">${p.label}</div>
+                        <div class="img-wrap">
+                            <img src="${p.image}" onerror="this.src='https://via.placeholder.com/150?text=RHF'">
+                        </div>
+                        <h4 class="p-title">${p.name}</h4>
+                        <div class="p-desc">${p.desc || 'No description provided.'}</div>
+                        <div class="p-price">Rp ${p.price.toLocaleString()}</div>
+                        <button class="btn-buy" onclick="checkout('${p.id}', '${p.name}', ${p.price})">BELI SEKARANG</button>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. Filter Kategori
+        function filterShop(label, el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            if (label === 'All') {
+                renderProducts(allProducts);
+            } else {
+                const filtered = allProducts.filter(p => p.label === label);
+                renderProducts(filtered);
+            }
+        }
+
+        // 5. Checkout Logic
+        function checkout(id, name, price) {
             const code = Math.floor(Math.random() * 899) + 100;
             const total = price + code;
-            if (confirm(`Beli ${name}?\nTotal Transfer: Rp ${total.toLocaleString()}`)) {
+            
+            const confirmBuy = confirm(`PESANAN: ${name}\nTOTAL: Rp ${total.toLocaleString()}\n(Sudah termasuk kode unik)\n\nLanjutkan pemesanan?`);
+            
+            if (confirmBuy) {
                 const tid = "RHF" + Date.now().toString().slice(-4);
                 db.ref('transactions/' + tid).set({
                     userName: auth.currentUser.displayName,
                     productName: name,
                     total: total,
                     uniqueCode: code,
-                    status: 'Pending'
-                }).then(() => alert("Pesanan Masuk! Tunggu Verifikasi."));
+                    status: 'Pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    alert("PESANAN TERKIRIM!\nSilakan lakukan pembayaran sesuai nominal di atas.");
+                });
             }
         }
     </script>
