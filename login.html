@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RHF Shop • Digital Premium</title>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: rgba(30, 30, 30, 0.95);
+      border: 1px solid #d4af37;
+      border-radius: 16px;
+      padding: 60px 40px;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: #d4af37;
+      margin-bottom: 10px;
+    }
+    p { color: #aaa; font-size: 1.1rem; }
+    button {
+      background: linear-gradient(to right, #d4af37, #f0d68a);
+      color: #0f0f0f;
+      font-weight: 600;
+      padding: 16px 40px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      margin-top: 30px;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>RHF Shop</h1>
+    <p>Digital Collection • Premium Experience</p>
+    <button onclick="loginGoogle()">Login dengan Google</button>
+  </div>
+
+  <script>
+    // firebase config + initialize (paste firebaseConfig dan firebase.initializeApp di sini seperti sebelumnya)
+    const firebaseConfig = { /* paste config kamu di sini */ };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function loginGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => window.location.href = "shop.html")
+        .catch(err => alert("Login gagal: " + err.message));
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = "shop.html";
+    });
+  </script>
+</body>
+</html>
