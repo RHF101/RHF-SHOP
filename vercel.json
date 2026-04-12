@@ -1,29 +1,9 @@
 {
-  "version": 2,
-  "name": "rhf-storz",
   "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
   "rewrites": [
     { "source": "/login", "destination": "/index.html" },
+    { "source": "/shop", "destination": "/shop.html" },
     { "source": "/market", "destination": "/shop.html" },
     { "source": "/arsitek-zone", "destination": "/control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" }
   ]
 }
-    
