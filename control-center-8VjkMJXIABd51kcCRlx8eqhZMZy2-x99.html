@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF SUPREME V11 • AUDIT & NOTIF</title>
+    <title>RHF COMMAND CENTER V12</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -16,42 +16,45 @@
         }
 
         body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         
-        nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
         .container { padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media(min-width: 1100px) { .container { grid-template-columns: 350px 1fr; } }
 
         .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; }
         h2 { font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 10px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .table-wrap { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 600px; }
         th { text-align: left; padding: 12px; color: #444; border-bottom: 1px solid var(--border); }
-        td { padding: 15px 12px; border-bottom: 1px solid #111; }
+        td { padding: 15px 12px; border-bottom: 1px solid #111; vertical-align: middle; }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 900; font-size: 0.6rem; }
-        .badge-pending { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
-        .badge-success { background: rgba(0, 255, 163, 0.1); color: var(--success); }
-
-        input { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono'; }
-        .btn-core { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; }
-        .btn-approve { background: var(--success); color: #000; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 900; cursor: pointer; }
+        input, textarea { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; }
+        .btn-core { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; }
+        
+        .btn-action { padding: 6px 10px; border-radius: 6px; font-weight: 900; cursor: pointer; border: none; font-size: 0.65rem; margin-right: 5px; }
+        .btn-edit { background: var(--ai); color: #000; }
+        .btn-delete { background: var(--danger); color: #fff; }
+        .btn-approve { background: var(--success); color: #000; }
 
         #gate-keeper { position: fixed; inset: 0; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 900; font-size: 0.6rem; }
+        .badge-pending { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
     </style>
 </head>
 <body>
 
     <div id="gate-keeper">
         <div style="text-align:center; width: 300px;">
-            <h1 style="color:var(--gold)">RHF ACCESS</h1>
-            <input type="password" id="sys-pass" placeholder="PASSWORD ADMIN">
-            <button class="btn-core" onclick="authorize()">LOGIN SYSTEM</button>
+            <h1 style="color:var(--gold); font-weight: 900;">RHF COMMAND</h1>
+            <input type="password" id="sys-pass" placeholder="ACCESS KEY">
+            <button class="btn-core" onclick="authorize()">UNLOCK SYSTEM</button>
         </div>
     </div>
 
     <nav>
-        <div style="font-weight:900;">RHF<span style="color:var(--gold)">AUDIT</span> V11</div>
-        <div id="sync-status" style="font-size:0.6rem; color:var(--ai)">● MONITORING TRANSACTIONS...</div>
+        <div style="font-weight:900;">RHF<span style="color:var(--gold)">CORE</span> V12</div>
+        <div style="font-size:0.6rem; color:var(--success)">● WAREHOUSE CONNECTED</div>
     </nav>
 
     <div class="container" id="admin-ui" style="display:none;">
@@ -62,32 +65,50 @@
             </div>
 
             <div class="widget">
-                <h2>Quick Product Deploy</h2>
-                <input type="text" id="p-name" placeholder="Item Name">
-                <input type="number" id="p-price" placeholder="Price">
-                <button class="btn-core" onclick="pushItem()">DEPLOY</button>
+                <h2>Deploy New Asset</h2>
+                <input type="text" id="p-name" placeholder="Product Name">
+                <input type="number" id="p-price" placeholder="Price (IDR)">
+                <input type="text" id="p-img" placeholder="Image URL (Optional)">
+                <textarea id="p-desc" placeholder="Brief description..."></textarea>
+                <button class="btn-core" onclick="pushItem()">PUSH TO STORE</button>
             </div>
             
             <div class="widget">
-                <h2>System Settings</h2>
-                <p style="font-size: 0.6rem; color: #444;">Telegram Bot Integration</p>
+                <h2>Bot Config</h2>
                 <input type="text" id="tg-token" placeholder="Bot Token">
                 <input type="text" id="tg-id" placeholder="Chat ID">
-                <button class="btn-core" style="background:#222; color:#fff; font-size:0.7rem;" onclick="saveConfig()">SAVE CONFIG</button>
+                <button class="btn-core" style="background:#222; color:#fff; font-size:0.7rem;" onclick="saveConfig()">UPDATE TELEGRAM</button>
             </div>
         </div>
 
         <div class="main">
             <div class="widget">
+                <h2>Product Warehouse (Stock & Price)</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PRODUCT NAME</th>
+                                <th>PRICE</th>
+                                <th>DESCRIPTION</th>
+                                <th>CONTROL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="widget">
                 <h2>Master Audit Log</h2>
-                <div style="overflow-x: auto;">
+                <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
                                 <th>TIME</th>
-                                <th>TRANSACTION ID</th>
-                                <th>USER / PRODUCT</th>
-                                <th>NOMINAL</th>
+                                <th>TID / USER</th>
+                                <th>PRODUCT</th>
+                                <th>TOTAL</th>
                                 <th>STATUS</th>
                                 <th>ACTION</th>
                             </tr>
@@ -114,95 +135,116 @@
             if(document.getElementById('sys-pass').value === "gacoruncek73@gmail.com") {
                 document.getElementById('gate-keeper').style.display = 'none';
                 document.getElementById('admin-ui').style.display = 'grid';
-                startAudit();
+                initSystem();
             }
         }
 
-        // --- NOTIFIKASI TELEGRAM ---
         function sendTele(msg) {
             const token = localStorage.getItem('tgToken');
             const id = localStorage.getItem('tgId');
-            if(token && id) {
-                fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(msg)}`);
-            }
+            if(token && id) fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(msg)}`);
         }
 
         function saveConfig() {
             localStorage.setItem('tgToken', document.getElementById('tg-token').value);
             localStorage.setItem('tgId', document.getElementById('tg-id').value);
-            alert("Config Saved!");
+            alert("Bot Config Updated!");
         }
 
-        function startAudit() {
-            // Load Config
+        function initSystem() {
             document.getElementById('tg-token').value = localStorage.getItem('tgToken') || "";
             document.getElementById('tg-id').value = localStorage.getItem('tgId') || "";
 
-            // Listener Transaksi Baru (Untuk Bunyi Alarm)
+            // 1. MONITOR TRANSACTIONS
+            db.ref('transactions').on('value', snap => {
+                const table = document.getElementById('audit-table');
+                let html = ''; let revenue = 0;
+                if(!snap.exists()) return;
+
+                const items = []; snap.forEach(c => { items.push(c.val()); });
+                items.reverse().forEach(t => {
+                    if(t.status === 'Success') revenue += t.total;
+                    html += `<tr>
+                        <td>${new Date(t.timestamp).toLocaleTimeString()}</td>
+                        <td><b style="color:var(--gold)">#${t.tid}</b><br><small>${t.userName}</small></td>
+                        <td>${t.productName}</td>
+                        <td>Rp ${t.total.toLocaleString()}<br><small>Code: ${t.uniqueCode}</small></td>
+                        <td><span class="badge badge-${t.status.toLowerCase()}">${t.status}</span></td>
+                        <td>${t.status === 'Pending' ? `<button class="btn-action btn-approve" onclick="approve('${t.tid}', ${t.total})">APPROVE</button>` : '<b>✓</b>'}</td>
+                    </tr>`;
+                });
+                table.innerHTML = html;
+                document.getElementById('total-rev').innerText = "Rp " + revenue.toLocaleString();
+            });
+
+            // 2. MONITOR WAREHOUSE (PRODUCTS)
+            db.ref('products').on('value', snap => {
+                const pTable = document.getElementById('product-table');
+                let html = '';
+                snap.forEach(c => {
+                    const p = c.val();
+                    const key = c.key;
+                    html += `<tr>
+                        <td><b>${p.name}</b></td>
+                        <td>Rp ${p.price.toLocaleString()}</td>
+                        <td style="color:#666">${p.desc || '-'}</td>
+                        <td>
+                            <button class="btn-action btn-edit" onclick="editPrice('${key}', ${p.price})">PRICE</button>
+                            <button class="btn-action btn-delete" onclick="deleteItem('${key}', '${p.name}')">DEL</button>
+                        </td>
+                    </tr>`;
+                });
+                pTable.innerHTML = html;
+            });
+
+            // 3. SOUND ALERT
             db.ref('transactions').limitToLast(1).on('child_added', snap => {
                 const data = snap.val();
                 if(Date.now() - data.timestamp < 10000) {
                     document.getElementById('alert-sound').play();
-                    sendTele(`🔔 PESANAN BARU!\n\nID: #${data.tid}\nUser: ${data.userName}\nItem: ${data.productName}\nTotal: Rp ${data.total.toLocaleString()}`);
+                    sendTele(`🔔 PESANAN BARU!\n\nID: #${data.tid}\nItem: ${data.productName}\nTotal: Rp ${data.total.toLocaleString()}`);
                 }
-            });
-
-            // Master List Update
-            db.ref('transactions').on('value', snap => {
-                const table = document.getElementById('audit-table');
-                const revDisp = document.getElementById('total-rev');
-                let html = '';
-                let revenue = 0;
-
-                if(!snap.exists()) { table.innerHTML = "<tr><td colspan='6' style='text-align:center'>No Data</td></tr>"; return; }
-
-                const items = [];
-                snap.forEach(c => { items.push(c.val()); });
-                items.reverse();
-
-                items.forEach(t => {
-                    if(t.status === 'Success') revenue += t.total;
-                    const isPending = t.status === 'Pending';
-
-                    html += `
-                        <tr>
-                            <td style="color:#444; font-size:0.6rem;">${new Date(t.timestamp).toLocaleTimeString()}</td>
-                            <td style="font-weight:900; color:var(--gold)">#${t.tid}</td>
-                            <td>
-                                <b>${t.userName}</b><br>
-                                <span style="font-size:0.6rem; color:#666;">${t.productName}</span>
-                            </td>
-                            <td style="font-family:'JetBrains Mono';">
-                                <b>Rp ${t.total.toLocaleString()}</b><br>
-                                <small style="color:#444">Code: ${t.uniqueCode}</small>
-                            </td>
-                            <td><span class="badge badge-${t.status.toLowerCase()}">${t.status}</span></td>
-                            <td>
-                                ${isPending ? `<button class="btn-approve" onclick="approve('${t.tid}', ${t.total})">APPROVE</button>` : `<b style="color:var(--success)">DONE</b>`}
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                table.innerHTML = html;
-                revDisp.innerText = "Rp " + revenue.toLocaleString();
             });
         }
 
-        function approve(tid, total) {
-            if(confirm(`Konfirmasi saldo masuk Rp ${total.toLocaleString()}?`)) {
-                db.ref('transactions/' + tid).update({ status: 'Success' }).then(() => {
-                    sendTele(`✅ SALDO TERBUKTI MASUK!\n\nID: #${tid}\nTotal: Rp ${total.toLocaleString()}\nStatus: Sukses Lolos Audit.`);
+        // --- PRODUCT MANAGEMENT LOGIC ---
+        function pushItem() {
+            const name = document.getElementById('p-name').value;
+            const price = parseInt(document.getElementById('p-price').value);
+            const desc = document.getElementById('p-desc').value;
+            const img = document.getElementById('p-img').value;
+
+            if(name && price) {
+                db.ref('products').push().set({ 
+                    name, price, desc, 
+                    image: img || "https://via.placeholder.com/150",
+                    timestamp: firebase.database.ServerValue.TIMESTAMP 
+                }).then(() => {
+                    alert("Product Pushed to Store!");
+                    document.getElementById('p-name').value = '';
+                    document.getElementById('p-price').value = '';
                 });
             }
         }
 
-        function pushItem() {
-            const name = document.getElementById('p-name').value;
-            const price = parseInt(document.getElementById('p-price').value);
-            if(name && price) {
-                db.ref('products').push().set({ name, price, timestamp: firebase.database.ServerValue.TIMESTAMP });
-                alert("Product Deployed!");
+        function editPrice(key, current) {
+            const newPrice = prompt("Enter new price for this asset:", current);
+            if(newPrice) {
+                db.ref('products/' + key).update({ price: parseInt(newPrice) });
+            }
+        }
+
+        function deleteItem(key, name) {
+            if(confirm(`Delete ${name} from warehouse? This cannot be undone.`)) {
+                db.ref('products/' + key).remove();
+            }
+        }
+
+        function approve(tid, total) {
+            if(confirm(`Confirm balance Rp ${total.toLocaleString()}?`)) {
+                db.ref('transactions/' + tid).update({ status: 'Success' }).then(() => {
+                    sendTele(`✅ SALDO TERBUKTI MASUK!\n\nID: #${tid}\nTotal: Rp ${total.toLocaleString()}`);
+                });
             }
         }
     </script>
