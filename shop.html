@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
 
     <style>
         :root {
@@ -52,6 +51,11 @@
             cursor: pointer;
             font-size: 0.75rem;
             font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 77, 77, 0.1);
         }
 
         /* Struk & Tracking Section */
@@ -86,32 +90,77 @@
         .filter-container {
             display: flex;
             gap: 10px;
-            padding: 10px 20px;
+            padding: 15px 20px;
             overflow-x: auto;
             scrollbar-width: none;
         }
+
         .chip {
-            padding: 8px 18px;
+            padding: 10px 20px;
             background: #1a1a1a;
             border: 1px solid var(--border);
             border-radius: 50px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
+            color: #fff;
             white-space: nowrap;
+            transition: all 0.3s ease;
         }
-        .chip.active { background: var(--gold); color: #000; font-weight: bold; border-color: var(--gold); }
+
+        /* WARNANYA BERUBAH KUNING SAAT AKTIF */
+        .chip.active {
+            background: var(--gold) !important;
+            color: #000 !important;
+            font-weight: bold;
+            border-color: var(--gold);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
 
         /* Grid Produk */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px; }
-        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; position: relative; }
-        
-        .label-tag { position: absolute; top: 8px; left: 8px; font-size: 0.55rem; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; z-index: 5; }
-        .tag-biasa { background: #444; }
-        .tag-menengah { background: #2980b9; }
-        .tag-premium { background: var(--gold); color: #000; }
-        .tag-limited { background: #c0392b; }
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: 15px; 
+            padding: 20px; 
+        }
 
-        .btn-buy { width: 100%; background: var(--gold); border: none; padding: 10px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .product-card { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 12px; 
+            position: relative; 
+            transition: 0.3s;
+        }
+
+        .label-tag { 
+            position: absolute; 
+            top: 8px; 
+            left: 8px; 
+            font-size: 0.55rem; 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            z-index: 5; 
+        }
+
+        .tag-biasa { background: #444; color: #fff; }
+        .tag-menengah { background: #2980b9; color: #fff; }
+        .tag-premium { background: var(--gold); color: #000; }
+        .tag-limited { background: #c0392b; color: #fff; }
+
+        .btn-buy { 
+            width: 100%; 
+            background: var(--gold); 
+            border: none; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            margin-top: 10px; 
+            cursor: pointer; 
+            color: #000;
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -119,9 +168,9 @@
 <body>
 
     <nav>
-        <div style="color: var(--gold); font-weight: bold; font-size: 1.1rem;">RHF STORZ</div>
+        <div style="color: var(--gold); font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;">RHF STORZ</div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <span id="user-display" style="font-size: 0.7rem; color: #888;"></span>
+            <span id="user-display" style="font-size: 0.75rem; color: #888;"></span>
             <button class="btn-logout" onclick="logoutSession()">Logout</button>
         </div>
     </nav>
@@ -155,7 +204,19 @@
     <div id="admin-gate"></div>
 
     <script src="js/firebase-config.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/shop.js"></script>
+
+    <script>
+        // Logika Logout yang sudah diperbaiki
+        function logoutSession() {
+            if (confirm("Keluar dari RHF STORZ?")) {
+                firebase.auth().signOut().then(() => {
+                    window.location.replace("index.html");
+                }).catch((error) => {
+                    alert("Gagal Logout: " + error.message);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
