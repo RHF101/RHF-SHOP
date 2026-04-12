@@ -55,7 +55,6 @@
 
         h2 { color: var(--gold); font-size: 1rem; margin-top: 0; margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 10px; }
 
-        /* Form Styling */
         .form-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
         }
@@ -73,7 +72,6 @@
             cursor: pointer; margin-top: 15px; transition: 0.3s;
         }
 
-        /* Table Styling */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { text-align: left; padding: 15px; color: #555; font-size: 0.75rem; text-transform: uppercase; }
@@ -98,7 +96,7 @@
 
     <div id="admin-lock">
         <h1 style="color: var(--gold); letter-spacing: 5px;">RHF CORE</h1>
-        <p id="lock-msg">Authenticating Architect...</p>
+        <p id="lock-msg">Checking Architect Credentials...</p>
     </div>
 
     <div class="container">
@@ -111,7 +109,7 @@
         </header>
 
         <div class="card">
-            <h2>➕ MANAJEMEN KATALOG</h2>
+            <h2>➕ TAMBAH PRODUK BARU</h2>
             <div class="form-grid">
                 <input type="text" id="p-name" placeholder="Nama Produk">
                 <input type="number" id="p-price" placeholder="Harga Dasar (Rp)">
@@ -123,20 +121,20 @@
                     <option value="Limited">Label: Limited</option>
                 </select>
             </div>
-            <button class="btn-gold" onclick="submitProduct()">PUBLIKASIKAN KE MARKET</button>
+            <button class="btn-gold" onclick="submitProduct()">POSTING PRODUK</button>
         </div>
 
         <div class="card">
-            <h2>📦 PESANAN MASUK & TRACKING</h2>
+            <h2>📦 MONITOR TRANSAKSI & KODE UNIK</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>User</th>
                             <th>Produk</th>
-                            <th>Total (Kode Unik)</th>
+                            <th>Total (Cek Kode Unik)</th>
                             <th>Status</th>
-                            <th>Kontrol Tahapan</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="trx-list">
@@ -150,70 +148,58 @@
     <script>
         const db = firebase.database();
         const auth = firebase.auth();
-        const ARSITEK_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
+        const ADMIN_EMAIL = "gacoruncek73@gmail.com";
 
-        // PROTEKSI AKSES
+        // PROTEKSI BERBASIS EMAIL (GACOR & CEPAT)
         auth.onAuthStateChanged(user => {
-            if (user && user.uid === ARSITEK_UID) {
+            if (user && user.email === ADMIN_EMAIL) {
                 document.getElementById('admin-lock').style.display = 'none';
                 loadTransactions();
             } else {
+                alert("Akses Ditolak! Hanya untuk Arsitek.");
                 window.location.replace("shop.html");
             }
         });
 
-        // 1. FUNGSI TAMBAH PRODUK
         function submitProduct() {
             const name = document.getElementById('p-name').value;
             const price = parseInt(document.getElementById('p-price').value);
             const img = document.getElementById('p-img').value;
             const label = document.getElementById('p-label').value;
 
-            if(!name || !price || !img) return alert("Data belum lengkap!");
+            if(!name || !price || !img) return alert("Isi semua data!");
 
             const id = "P-" + Date.now();
             db.ref('products/' + id).set({
-                id: id,
-                name: name,
-                price: price,
-                image: img,
-                label: label
+                id: id, name: name, price: price, image: img, label: label
             }).then(() => {
-                alert("Produk Berhasil Ditayangkan!");
+                alert("Produk Berhasil Ditambahkan!");
                 location.reload();
             });
         }
 
-        // 2. LOAD TRANSAKSI REAL-TIME
         function loadTransactions() {
             db.ref('transactions').on('value', snap => {
                 const list = document.getElementById('trx-list');
                 list.innerHTML = '';
                 const data = snap.val();
 
-                if (!data) return list.innerHTML = '<tr><td colspan="5" style="text-align:center">Belum ada pesanan.</td></tr>';
+                if (!data) return list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada pesanan masuk.</td></tr>';
 
-                // Sortir agar yang terbaru di atas
-                const keys = Object.keys(data).reverse();
-
-                keys.forEach(key => {
+                Object.keys(data).reverse().forEach(key => {
                     const t = data[key];
                     list.innerHTML += `
                         <tr>
-                            <td><strong>${t.userName}</strong><br><small style="color:#555">${t.userUid.slice(0,8)}...</small></td>
+                            <td><strong>${t.userName}</strong></td>
                             <td>${t.productName}</td>
                             <td>
                                 <strong style="color:var(--gold)">Rp ${t.total.toLocaleString()}</strong><br>
-                                <small>Kode: ${t.uniqueCode}</small>
+                                <small>Unik: ${t.uniqueCode}</small>
                             </td>
                             <td><span class="status-pill pill-${t.status.toLowerCase()}">${t.status}</span></td>
                             <td>
-                                ${t.status === 'Pending' ? `
-                                    <button class="action-btn" style="background:var(--process)" onclick="updateStatus('${key}', 'Process')">Proses (Tahap 2)</button>
-                                ` : ''}
-                                ${t.status === 'Process' ? `
-                                    <button class="action-btn" style="background:var(--success)" onclick="updateStatus('${key}', 'Success')">Selesai (Tahap 3)</button>
-                                ` : ''}
+                                ${t.status === 'Pending' ? `<button class="action-btn" style="background:var(--process)" onclick="updateStatus('${key}', 'Process')">Proses</button>` : ''}
+                                ${t.status === 'Process' ? `<button class="action-btn" style="background:var(--success)" onclick="updateStatus('${key}', 'Success')">Selesai</button>` : ''}
                                 <button class="action-btn" style="background:var(--danger)" onclick="deleteTrx('${key}')">Hapus</button>
                             </td>
                         </tr>
@@ -222,18 +208,12 @@
             });
         }
 
-        // 3. UPDATE STATUS TAHAPAN
         function updateStatus(id, newStatus) {
-            if(confirm(`Ubah pesanan ke status ${newStatus}?`)) {
-                db.ref('transactions/' + id).update({ status: newStatus });
-            }
+            db.ref('transactions/' + id).update({ status: newStatus });
         }
 
-        // 4. HAPUS DATA (CLEANUP)
         function deleteTrx(id) {
-            if(confirm("Hapus permanen data transaksi ini?")) {
-                db.ref('transactions/' + id).remove();
-            }
+            if(confirm("Hapus data ini?")) db.ref('transactions/' + id).remove();
         }
 
         function adminLogout() {
