@@ -20,83 +20,94 @@
 
         .receipt-container {
             background: var(--card); border: 1px solid var(--border);
-            width: 100%; max-width: 380px; border-radius: 24px; padding: 25px;
+            width: 100%; max-width: 400px; border-radius: 24px; padding: 30px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
+            position: relative;
         }
 
-        .receipt-container::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
-            background: linear-gradient(90deg, var(--gold), #ffecb3, var(--gold));
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { font-size: 1.2rem; color: var(--gold); margin: 0; font-weight: 900; }
+
+        /* --- STATUS AREA --- */
+        #status-box {
+            text-align: center; padding: 15px; border-radius: 15px;
+            margin-bottom: 25px; font-size: 0.8rem; font-weight: bold;
         }
+        .pending-box { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid var(--gold); }
+        .success-box { background: rgba(0, 255, 163, 0.1); color: var(--success); border: 1px solid var(--success); }
 
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 1.2rem; font-weight: 900; color: var(--gold); margin: 0; }
-        .header p { font-size: 0.7rem; color: #555; margin: 5px 0 0; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- DETAILS --- */
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; }
+        .label { color: #555; }
+        .value { font-family: 'JetBrains Mono', monospace; font-weight: bold; }
 
-        .status-badge {
-            background: rgba(0, 255, 163, 0.1); color: var(--success);
-            padding: 8px 15px; border-radius: 12px; font-size: 0.7rem;
-            font-weight: 900; display: inline-block; margin-bottom: 25px;
-        }
+        .divider { border-top: 1px dashed var(--border); margin: 20px 0; }
 
-        .item-detail {
-            border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
-            padding: 20px 0; margin-bottom: 25px;
-        }
-
-        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; }
-        .row .label { color: #666; }
-        .row .value { font-family: 'JetBrains Mono', monospace; font-weight: bold; text-align: right; }
-
-        .total-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: #000; border-radius: 15px; margin-bottom: 20px;
-        }
-        .total-label { font-size: 0.7rem; font-weight: 900; color: var(--gold); }
-        .total-value { font-size: 1.2rem; font-weight: 900; color: #fff; }
-
-        .footer-note {
-            text-align: center; font-size: 0.65rem; color: #444; line-height: 1.5;
-            margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;
-        }
-
-        .btn-back {
+        /* --- ASSET ACCESS (HIDDEN BY DEFAULT) --- */
+        #download-area { display: none; margin-top: 25px; }
+        
+        .btn-download {
             display: block; text-align: center; background: #fff; color: #000;
-            text-decoration: none; padding: 15px; border-radius: 15px;
-            font-weight: 900; font-size: 0.8rem; margin-top: 25px; transition: 0.3s;
+            text-decoration: none; padding: 18px; border-radius: 15px;
+            font-weight: 900; font-size: 0.85rem; transition: 0.3s;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
-        .btn-back:active { transform: scale(0.95); }
+
+        .btn-refresh {
+            background: none; border: 1px solid #333; color: #555;
+            padding: 8px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; width: 100%;
+        }
     </style>
 </head>
 <body>
 
     <div class="receipt-container">
         <div class="header">
-            <h1>RHF STORZ</h1>
-            <p>Digital Asset Receipt</p>
+            <h1>RHF STORZ RECEIPT</h1>
+            <p style="font-size: 0.6rem; color: #444; letter-spacing: 2px;">OFFICIAL TRANSACTION LOG</p>
         </div>
 
-        <div style="text-align: center;">
-            <div class="status-badge">PAYMENT CONFIRMED</div>
+        <div id="status-box" class="pending-box">
+            WAITING FOR VERIFICATION...
         </div>
 
-        <div class="item-detail" id="struk-content">
-            <p style="text-align:center; color:#333;">Syncing data...</p>
+        <div id="receipt-data">
+            <div class="info-row">
+                <span class="label">Transaction ID</span>
+                <span class="value" id="res-tid">#------</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Customer</span>
+                <span class="value" id="res-user">Loading...</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Product</span>
+                <span class="value" id="res-product">---</span>
+            </div>
+            <div class="divider"></div>
+            <div class="info-row">
+                <span class="label">Base Price</span>
+                <span class="value" id="res-base">Rp 0</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Unique Code</span>
+                <span class="value" style="color:var(--gold)" id="res-code">+0</span>
+            </div>
+            <div class="info-row" style="margin-top: 10px;">
+                <span class="label" style="color:#fff; font-weight: 900;">TOTAL PAID</span>
+                <span class="value" style="font-size: 1.1rem; color:var(--success)" id="res-total">Rp 0</span>
+            </div>
         </div>
 
-        <div class="total-row">
-            <div class="total-label">TOTAL PAID</div>
-            <div class="total-value" id="total-val">Rp 0</div>
+        <div id="download-area">
+            <div class="divider"></div>
+            <p style="text-align: center; font-size: 0.7rem; color: var(--success); margin-bottom: 15px;">✓ ASSET ACCESS GRANTED</p>
+            <a href="#" id="file-link" class="btn-download">AMBIL BARANG SEKARANG</a>
         </div>
 
-        <div class="footer-note">
-            Terima kasih telah berbelanja di RHF STORZ.<br>
-            Simpan struk ini sebagai bukti kepemilikan asset digital Anda.<br>
-            <b>© 2026 RHF ARCHITECT SYSTEM</b>
+        <div style="margin-top: 30px;">
+            <button class="btn-refresh" onclick="location.reload()">REFRESH STATUS MANUAL</button>
         </div>
-
-        <a href="shop.html" class="btn-back">KEMBALI KE TOKO</a>
     </div>
 
     <script>
@@ -108,50 +119,46 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Ambil Transaction ID dari URL (contoh: nota.html?tid=RHF12345)
         const urlParams = new URLSearchParams(window.location.search);
         const tid = urlParams.get('tid');
 
         if(tid) {
+            // Real-time Watcher (Persistent)
             db.ref('transactions/' + tid).on('value', snap => {
                 const t = snap.val();
                 if(t) {
-                    // Render Rincian Struk
-                    document.getElementById('struk-content').innerHTML = `
-                        <div class="row">
-                            <span class="label">ID Transaksi</span>
-                            <span class="value" style="color:var(--gold)">#${t.tid}</span>
-                        </div>
-                        <div class="row">
-                            <span class="label">Nama Pembeli</span>
-                            <span class="value">${t.userName}</span>
-                        </div>
-                        <div class="row">
-                            <span class="label">Produk</span>
-                            <span class="value">${t.productName}</span>
-                        </div>
-                        <div class="row">
-                            <span class="label">Harga Item</span>
-                            <span class="value">Rp ${t.basePrice.toLocaleString()}</span>
-                        </div>
-                        <div class="row">
-                            <span class="label">Kode Unik</span>
-                            <span class="value">+${t.uniqueCode}</span>
-                        </div>
-                        <div class="row" style="margin-top:15px;">
-                            <span class="label">Waktu</span>
-                            <span class="value" style="font-size:0.7rem">${new Date(t.timestamp).toLocaleString('id-ID')}</span>
-                        </div>
-                        <div class="row">
-                            <span class="label">Metode</span>
-                            <span class="value">Automatic Verification</span>
-                        </div>
-                    `;
-                    document.getElementById('total-val').innerText = `Rp ${t.total.toLocaleString()}`;
+                    renderReceipt(t);
                 } else {
-                    document.getElementById('struk-content').innerHTML = `<p style="text-align:center; color:red;">Transaksi Tidak Ditemukan</p>`;
+                    document.body.innerHTML = "<h2 style='color:red; text-align:center; padding-top:50px;'>TRANSID NOT FOUND</h2>";
                 }
             });
+        }
+
+        function renderReceipt(t) {
+            // Fill Data
+            document.getElementById('res-tid').innerText = "#" + t.tid;
+            document.getElementById('res-user').innerText = t.userName;
+            document.getElementById('res-product').innerText = t.productName;
+            document.getElementById('res-base').innerText = "Rp " + t.basePrice.toLocaleString();
+            document.getElementById('res-code').innerText = "+" + t.uniqueCode;
+            document.getElementById('res-total').innerText = "Rp " + t.total.toLocaleString();
+
+            const sBox = document.getElementById('status-box');
+            const dArea = document.getElementById('download-area');
+
+            if(t.status === 'Success') {
+                sBox.innerText = "PAYMENT VERIFIED";
+                sBox.className = "success-box";
+                dArea.style.display = "block";
+                
+                // Ambil link file dari database produk (Logic: ambil data produk berdasarkan ID)
+                // Sementara kita arahkan ke link demo atau placeholder
+                document.getElementById('file-link').href = "https://your-storage-link.com/asset/" + t.tid;
+            } else {
+                sBox.innerText = "WAITING FOR ADMIN VERIFICATION";
+                sBox.className = "pending-box";
+                dArea.style.display = "none";
+            }
         }
     </script>
 </body>
