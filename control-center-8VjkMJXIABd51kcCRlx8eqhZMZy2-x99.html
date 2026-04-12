@@ -22,13 +22,7 @@
             --danger: #e74c3c;
         }
 
-        body {
-            background: var(--dark);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
+        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; }
 
         /* Lock Screen Overlay */
         #admin-lock {
@@ -37,7 +31,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1100px; margin: 0 auto; display: none; } /* Tersembunyi sampai login sukses */
 
         header {
             display: flex; justify-content: space-between; align-items: center;
@@ -45,61 +39,39 @@
             padding-bottom: 20px; margin-bottom: 30px;
         }
 
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 30px; }
 
         h2 { color: var(--gold); font-size: 1rem; margin-top: 0; margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 10px; }
 
-        .form-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
-        }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 
-        input, select {
-            background: #000; border: 1px solid var(--border);
-            padding: 12px; border-radius: 8px; color: #fff; outline: none;
-        }
+        input, select { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: #fff; outline: none; width: 100%; box-sizing: border-box; }
 
-        input:focus { border-color: var(--gold); }
-
-        .btn-gold {
-            background: var(--gold); color: #000; border: none;
-            padding: 12px 25px; border-radius: 8px; font-weight: bold;
-            cursor: pointer; margin-top: 15px; transition: 0.3s;
-        }
+        .btn-gold { background: var(--gold); color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
 
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { text-align: left; padding: 15px; color: #555; font-size: 0.75rem; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
 
-        .status-pill {
-            padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
-        }
+        .status-pill { padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
         .pill-pending { background: #333; color: #fff; }
         .pill-process { background: var(--process); color: #000; }
         .pill-success { background: var(--success); color: #fff; }
 
-        .action-btn {
-            padding: 6px 12px; border-radius: 5px; border: none; font-weight: bold;
-            cursor: pointer; font-size: 0.75rem; margin-right: 5px;
-        }
-
+        .action-btn { padding: 6px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; font-size: 0.75rem; margin-right: 5px; }
         .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="admin-lock">
-        <h1 style="color: var(--gold); letter-spacing: 5px;">RHF CORE</h1>
-        <p id="lock-msg">Checking Architect Credentials...</p>
+        <h1 style="color: var(--gold); letter-spacing: 5px; margin-bottom: 5px;">RHF CORE</h1>
+        <p id="lock-msg" style="color: #555; font-size: 0.8rem;">Authenticating gacoruncek73@gmail.com...</p>
+        <button id="bypass-btn" style="display:none; margin-top:20px; background:none; border:1px solid #333; color:#333; padding:5px 10px; border-radius:5px; font-size:10px;" onclick="forceOpen()">FORCE BYPASS (DEBUG)</button>
     </div>
 
-    <div class="container">
+    <div class="container" id="main-content">
         <header>
             <div>
                 <h1 style="margin:0; font-size: 1.2rem; color: var(--gold);">ADMIN DASHBOARD</h1>
@@ -109,73 +81,90 @@
         </header>
 
         <div class="card">
-            <h2>➕ TAMBAH PRODUK BARU</h2>
+            <h2>➕ TAMBAH PRODUK</h2>
             <div class="form-grid">
                 <input type="text" id="p-name" placeholder="Nama Produk">
-                <input type="number" id="p-price" placeholder="Harga Dasar (Rp)">
-                <input type="text" id="p-img" placeholder="URL Gambar Produk">
+                <input type="number" id="p-price" placeholder="Harga (Rp)">
+                <input type="text" id="p-img" placeholder="Link Gambar">
                 <select id="p-label">
-                    <option value="Biasa">Label: Biasa</option>
-                    <option value="Menengah">Label: Menengah</option>
-                    <option value="Premium">Label: Premium</option>
-                    <option value="Limited">Label: Limited</option>
+                    <option value="Biasa">Biasa</option>
+                    <option value="Menengah">Menengah</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Limited">Limited</option>
                 </select>
             </div>
-            <button class="btn-gold" onclick="submitProduct()">POSTING PRODUK</button>
+            <button class="btn-gold" onclick="submitProduct()">POSTING</button>
         </div>
 
         <div class="card">
-            <h2>📦 MONITOR TRANSAKSI & KODE UNIK</h2>
+            <h2>📦 DAFTAR TRANSAKSI</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>User</th>
                             <th>Produk</th>
-                            <th>Total (Cek Kode Unik)</th>
+                            <th>Total (Unik)</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="trx-list">
-                        </tbody>
+                    <tbody id="trx-list"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <script src="js/firebase-config.js"></script>
     <script>
+        // --- 1. CONFIG FIREBASE (WAJIB BENAR) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
+            authDomain: "rhf-shop.firebaseapp.com",
+            databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "rhf-shop",
+        };
+
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
         const ADMIN_EMAIL = "gacoruncek73@gmail.com";
 
-        // PROTEKSI BERBASIS EMAIL (GACOR & CEPAT)
+        // Menampilkan tombol bypass jika loading > 5 detik
+        setTimeout(() => { document.getElementById('bypass-btn').style.display = 'block'; }, 5000);
+
+        // --- 2. PROTEKSI EMAIL ---
         auth.onAuthStateChanged(user => {
-            if (user && user.email === ADMIN_EMAIL) {
-                document.getElementById('admin-lock').style.display = 'none';
-                loadTransactions();
+            if (user) {
+                if (user.email === ADMIN_EMAIL) {
+                    openDashboard();
+                } else {
+                    document.getElementById('lock-msg').innerText = "Akses Ditolak: Email Salah.";
+                    setTimeout(() => { window.location.replace("shop.html"); }, 2000);
+                }
             } else {
-                alert("Akses Ditolak! Hanya untuk Arsitek.");
-                window.location.replace("shop.html");
+                window.location.replace("index.html");
             }
         });
 
+        function openDashboard() {
+            document.getElementById('admin-lock').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            loadTransactions();
+        }
+
+        function forceOpen() { if(confirm("Gunakan bypass hanya jika internet lag. Lanjutkan?")) openDashboard(); }
+
+        // --- 3. DATABASE LOGIC ---
         function submitProduct() {
             const name = document.getElementById('p-name').value;
             const price = parseInt(document.getElementById('p-price').value);
             const img = document.getElementById('p-img').value;
             const label = document.getElementById('p-label').value;
+            if(!name || !price || !img) return alert("Isi semua!");
 
-            if(!name || !price || !img) return alert("Isi semua data!");
-
-            const id = "P-" + Date.now();
-            db.ref('products/' + id).set({
-                id: id, name: name, price: price, image: img, label: label
-            }).then(() => {
-                alert("Produk Berhasil Ditambahkan!");
-                location.reload();
-            });
+            db.ref('products/' + Date.now()).set({
+                id: Date.now(), name, price, image: img, label
+            }).then(() => { alert("Sukses!"); location.reload(); });
         }
 
         function loadTransactions() {
@@ -183,8 +172,7 @@
                 const list = document.getElementById('trx-list');
                 list.innerHTML = '';
                 const data = snap.val();
-
-                if (!data) return list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada pesanan masuk.</td></tr>';
+                if (!data) return;
 
                 Object.keys(data).reverse().forEach(key => {
                     const t = data[key];
@@ -192,33 +180,21 @@
                         <tr>
                             <td><strong>${t.userName}</strong></td>
                             <td>${t.productName}</td>
-                            <td>
-                                <strong style="color:var(--gold)">Rp ${t.total.toLocaleString()}</strong><br>
-                                <small>Unik: ${t.uniqueCode}</small>
-                            </td>
+                            <td><strong style="color:var(--gold)">Rp ${t.total.toLocaleString()}</strong><br><small>Unik: ${t.uniqueCode}</small></td>
                             <td><span class="status-pill pill-${t.status.toLowerCase()}">${t.status}</span></td>
                             <td>
                                 ${t.status === 'Pending' ? `<button class="action-btn" style="background:var(--process)" onclick="updateStatus('${key}', 'Process')">Proses</button>` : ''}
                                 ${t.status === 'Process' ? `<button class="action-btn" style="background:var(--success)" onclick="updateStatus('${key}', 'Success')">Selesai</button>` : ''}
                                 <button class="action-btn" style="background:var(--danger)" onclick="deleteTrx('${key}')">Hapus</button>
                             </td>
-                        </tr>
-                    `;
+                        </tr>`;
                 });
             });
         }
 
-        function updateStatus(id, newStatus) {
-            db.ref('transactions/' + id).update({ status: newStatus });
-        }
-
-        function deleteTrx(id) {
-            if(confirm("Hapus data ini?")) db.ref('transactions/' + id).remove();
-        }
-
-        function adminLogout() {
-            auth.signOut().then(() => window.location.replace("index.html"));
-        }
+        function updateStatus(id, stat) { db.ref('transactions/' + id).update({ status: stat }); }
+        function deleteTrx(id) { if(confirm("Hapus?")) db.ref('transactions/' + id).remove(); }
+        function adminLogout() { auth.signOut().then(() => window.location.replace("index.html")); }
     </script>
 </body>
 </html>
