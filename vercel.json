@@ -20,13 +20,10 @@
       "destination": "/api/:path*"
     },
     {
-      "source": "/login",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/market",
-      "destination": "/shop.html"
-    }
+  "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/market", "destination": "/shop.html" },
+    { "source": "/arsitek-zone", "destination": "/control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" }
   ]
 }
-
+    
