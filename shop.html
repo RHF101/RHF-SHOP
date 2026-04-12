@@ -9,122 +9,186 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        /* Tambahan style khusus untuk floating buttons */
-        .floating-support {
+        :root {
+            --gold: #d4af37;
+            --dark: #0a0a0a;
+            --card: #141414;
+            --border: #222;
+        }
+
+        /* Style Lacak Pesanan (Tracking) */
+        .tracking-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .track-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            transition: 0.5s;
+        }
+
+        .step span {
+            font-size: 0.7rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        /* Garis Progress */
+        .track-line {
+            position: absolute;
+            top: 5px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: #222;
+            z-index: 1;
+        }
+
+        /* Aktif Status */
+        .step.active .dot {
+            background: var(--gold);
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        .step.active span {
+            color: #fff;
+        }
+
+        .floating-btn {
             position: fixed;
             bottom: 25px;
-            left: 25px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 12px 20px;
+            padding: 15px 25px;
             border-radius: 50px;
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            z-index: 9998;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: 0.3s;
-        }
-
-        .floating-support:hover {
-            border-color: var(--gold);
-            transform: scale(1.05);
-        }
-
-        #loader {
-            text-align: center;
-            padding: 50px;
-            color: var(--gold);
             font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: 0.3s;
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="#" class="logo">RHF STORZ</a>
-        <div id="user-info" style="font-size: 0.8rem; display: flex; align-items: center; gap: 15px;">
-            <span id="display-name" style="color: var(--gold); font-weight: 600;"></span>
-            <button class="btn-outline" onclick="logout()" style="padding: 5px 12px;">Logout</button>
-        </div>
+    <nav style="padding: 15px 5%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--gold); font-weight: bold; letter-spacing: 2px;">RHF STORZ</span>
+        <div id="user-display" style="font-size: 0.8rem; color: #888;"></div>
     </nav>
 
-    <div class="filter-bar">
-        <div class="chip active" onclick="filterData('All', this)">Semua</div>
-        <div class="chip" onclick="filterData('Premium', this)">Premium</div>
-        <div class="chip" onclick="filterData('Limited', this)">Limited</div>
-    </div>
-
-    <div class="container">
-        <div id="loader">Memuat Katalog Mewah...</div>
+    <div class="container" style="padding: 20px;">
         
+        <div id="tracking-container" style="display: none;">
+            <h2 style="font-size: 0.9rem; color: var(--gold); margin-bottom: 15px;">📦 STATUS PESANAN ANDA</h2>
+            <div class="tracking-card">
+                <div class="track-steps">
+                    <div class="track-line"></div>
+                    <div class="step" id="s1">
+                        <div class="dot"></div>
+                        <span>DI PROSES</span>
+                    </div>
+                    <div class="step" id="s2">
+                        <div class="dot"></div>
+                        <span>SEGERA</span>
+                    </div>
+                    <div class="step" id="s3">
+                        <div class="dot"></div>
+                        <span>SELESAI</span>
+                    </div>
+                </div>
+                <p id="track-msg" style="font-size: 0.75rem; text-align: center; color: #888; margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <div class="filter-bar" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <div class="chip active" onclick="filterData('All', this)">Semua</div>
+            <div class="chip" onclick="filterData('Premium', this)">Premium</div>
+        </div>
+
         <div id="shop-grid" class="product-grid">
             </div>
     </div>
 
-    <a href="chat.html" class="floating-support">
-        💬 RHF Support
+    <a href="chat.html" class="floating-btn" style="left: 25px; background: #1a1a1a; border: 1px solid #333; color: #fff; font-size: 0.8rem;">
+        💬 Support
     </a>
 
-    <div id="admin-portal"></div>
+    <div id="admin-gate"></div>
 
     <script src="js/firebase-config.js"></script>
     <script src="js/app.js"></script>
     <script src="js/shop.js"></script>
 
     <script>
-        // Script khusus untuk mendeteksi Arsitek (Radit)
-        const MASTER_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
+        const ARSITEK_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Tampilkan nama di Nav
-                document.getElementById('display-name').innerText = user.displayName;
+                document.getElementById('user-display').innerText = user.displayName;
+                
+                // Panggil Fitur Lacak
+                checkTracking(user.uid);
 
-                // Cek apakah ini Akun Arsitek
-                if (user.uid === MASTER_UID) {
-                    const portal = document.getElementById('admin-portal');
-                    portal.innerHTML = `
-                        <a href="control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" style="
-                            position: fixed; 
-                            bottom: 25px; 
-                            right: 25px; 
-                            background: linear-gradient(135deg, #d4af37, #f1c40f); 
-                            color: #000; 
-                            padding: 15px 25px; 
-                            border-radius: 50px; 
-                            font-weight: 800; 
-                            text-decoration: none; 
-                            z-index: 9999; 
-                            box-shadow: 0 10px 25px rgba(212,175,55,0.4);
-                            display: flex;
-                            align-items: center;
-                            gap: 10px;
-                            border: 2px solid rgba(255,255,255,0.3);
-                        ">
-                            ⚙️ KELOLA TOKO
+                // Cek Akun Arsitek untuk munculkan tombol rahasia
+                if (user.uid === ARSITEK_UID) {
+                    document.getElementById('admin-gate').innerHTML = `
+                        <a href="control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" class="floating-btn" style="right: 25px; background: var(--gold); color: #000;">
+                            ⚙️ ADMIN PANEL
                         </a>
                     `;
                 }
             } else {
-                // Jika tidak login, tendang ke landing page
-                window.location.replace("index.html");
+                window.location.replace("/");
             }
         });
 
-        // Pastikan loader hilang jika terjadi error atau data kosong
-        setTimeout(() => {
-            const loader = document.getElementById('loader');
-            if (loader) loader.style.display = 'none';
-        }, 5000);
+        function checkTracking(uid) {
+            db.ref('transactions').orderByChild('userUid').equalTo(uid).limitToLast(1).on('value', snap => {
+                if (snap.exists()) {
+                    document.getElementById('tracking-container').style.display = 'block';
+                    const data = Object.values(snap.val())[0];
+                    const msg = document.getElementById('track-msg');
+                    
+                    // Reset Steps
+                    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+                    // Logika 3 Tahap
+                    document.getElementById('s1').classList.add('active'); // Tahap 1 Selalu Aktif
+                    msg.innerText = "Menunggu konfirmasi pembayaran...";
+
+                    if (data.status === 'Process' || data.status === 'Success') {
+                        document.getElementById('s2').classList.add('active');
+                        msg.innerText = "Pembayaran valid! Pesanan segera dikirim.";
+                    }
+                    if (data.status === 'Success') {
+                        document.getElementById('s3').classList.add('active');
+                        msg.innerText = "Transaksi Selesai. Terima kasih!";
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
