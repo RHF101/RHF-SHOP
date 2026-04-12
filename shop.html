@@ -3,214 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Support • RHF STORZ</title>
+    <title>Marketplace • RHF STORZ</title>
+    
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark: #0a0a0a;
-            --card: #141414;
-            --border: #222;
-            --text-gray: #888;
-        }
-
-        body {
-            background: var(--dark);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Header */
-        header {
-            padding: 15px 5%;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10, 10, 10, 0.9);
-        }
-
-        header h1 { font-size: 1.2rem; color: var(--gold); margin: 0; }
-
-        /* Chat Container */
-        #chat-window {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            scrollbar-width: none;
-        }
-
-        #chat-window::-webkit-scrollbar { display: none; }
-
-        .msg {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: var(--gold);
-            color: #000;
-            border-bottom-right-radius: 2px;
-        }
-
-        .msg-admin {
-            align-self: flex-start;
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: #fff;
-            border-bottom-left-radius: 2px;
-        }
-
-        .msg-info {
-            font-size: 0.65rem;
-            margin-top: 5px;
-            display: block;
-            opacity: 0.7;
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 20px;
-            background: var(--card);
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
-        }
-
-        input {
-            flex: 1;
+        /* Tambahan style khusus untuk floating buttons */
+        .floating-support {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
             background: #1a1a1a;
-            border: 1px solid var(--border);
-            padding: 12px 15px;
-            border-radius: 8px;
+            border: 1px solid #333;
             color: #fff;
-            outline: none;
-        }
-
-        input:focus { border-color: var(--gold); }
-
-        button {
-            background: var(--gold);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: 0.3s;
         }
 
-        button:hover { opacity: 0.8; }
+        .floating-support:hover {
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
 
-        .btn-back {
-            color: var(--text-gray);
-            text-decoration: none;
-            font-size: 0.8rem;
+        #loader {
+            text-align: center;
+            padding: 50px;
+            color: var(--gold);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="shop.html" class="btn-back">← Kembali</a>
-        <h1>RHF Support</h1>
-        <div id="user-name" style="font-size: 0.8rem; color: var(--gold);"></div>
-    </header>
-
-    <div id="chat-window">
+    <nav>
+        <a href="#" class="logo">RHF STORZ</a>
+        <div id="user-info" style="font-size: 0.8rem; display: flex; align-items: center; gap: 15px;">
+            <span id="display-name" style="color: var(--gold); font-weight: 600;"></span>
+            <button class="btn-outline" onclick="logout()" style="padding: 5px 12px;">Logout</button>
         </div>
+    </nav>
 
-    <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
-        <button onclick="sendMessage()">Kirim</button>
+    <div class="filter-bar">
+        <div class="chip active" onclick="filterData('All', this)">Semua</div>
+        <div class="chip" onclick="filterData('Premium', this)">Premium</div>
+        <div class="chip" onclick="filterData('Limited', this)">Limited</div>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
-            authDomain: "rhf-shop.firebaseapp.com",
-            databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "rhf-shop",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
+    <div class="container">
+        <div id="loader">Memuat Katalog Mewah...</div>
+        
+        <div id="shop-grid" class="product-grid">
+            </div>
+    </div>
 
-        let currentUser = null;
-        const ADMIN_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
+    <a href="chat.html" class="floating-support">
+        💬 RHF Support
+    </a>
+
+    <div id="admin-portal"></div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/shop.js"></script>
+
+    <script>
+        // Script khusus untuk mendeteksi Arsitek (Radit)
+        const MASTER_UID = "8VjkMJXIABd51kcCRlx8eqhZMZy2";
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                currentUser = user;
-                document.getElementById('user-name').innerText = user.displayName;
-                loadMessages();
+                // Tampilkan nama di Nav
+                document.getElementById('display-name').innerText = user.displayName;
+
+                // Cek apakah ini Akun Arsitek
+                if (user.uid === MASTER_UID) {
+                    const portal = document.getElementById('admin-portal');
+                    portal.innerHTML = `
+                        <a href="control-center-8VjkMJXIABd51kcCRlx8eqhZMZy2-x99.html" style="
+                            position: fixed; 
+                            bottom: 25px; 
+                            right: 25px; 
+                            background: linear-gradient(135deg, #d4af37, #f1c40f); 
+                            color: #000; 
+                            padding: 15px 25px; 
+                            border-radius: 50px; 
+                            font-weight: 800; 
+                            text-decoration: none; 
+                            z-index: 9999; 
+                            box-shadow: 0 10px 25px rgba(212,175,55,0.4);
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            border: 2px solid rgba(255,255,255,0.3);
+                        ">
+                            ⚙️ KELOLA TOKO
+                        </a>
+                    `;
+                }
             } else {
+                // Jika tidak login, tendang ke landing page
                 window.location.replace("index.html");
             }
         });
 
-        function loadMessages() {
-            // Kita gunakan path 'chats' agar admin bisa melihat semua pesan
-            db.ref('chats').limitToLast(50).on('value', snapshot => {
-                const chatWindow = document.getElementById('chat-window');
-                chatWindow.innerHTML = '';
-                const messages = snapshot.val();
-
-                for (let id in messages) {
-                    const m = messages[id];
-                    const isMe = m.uid === currentUser.uid;
-                    const isAdmin = m.uid === ADMIN_UID;
-
-                    chatWindow.innerHTML += `
-                        <div class="msg ${isAdmin ? 'msg-admin' : (isMe ? 'msg-user' : 'msg-admin')}">
-                            <strong>${isAdmin ? 'Admin • ' : ''}${m.name}</strong><br>
-                            ${m.text}
-                            <span class="msg-info">${m.time}</span>
-                        </div>
-                    `;
-                }
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            });
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-
-            if (text !== "") {
-                const now = new Date();
-                const timeStr = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
-
-                db.ref('chats').push({
-                    uid: currentUser.uid,
-                    name: currentUser.displayName,
-                    text: text,
-                    time: timeStr,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                input.value = "";
-            }
-        }
-
-        function handleKey(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        // Pastikan loader hilang jika terjadi error atau data kosong
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            if (loader) loader.style.display = 'none';
+        }, 5000);
     </script>
 </body>
 </html>
