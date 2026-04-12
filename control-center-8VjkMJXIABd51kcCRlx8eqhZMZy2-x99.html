@@ -3,136 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Center • RHF STORZ</title>
+    <title>RHF CORE V4 • ARCHITECT COMMAND</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --gold: #d4af37; --dark: #0a0a0a; --card: #141414; --border: #222; --success: #27ae60; --process: #f39c12; --danger: #e74c3c; }
-        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        h2 { color: var(--gold); font-size: 0.9rem; margin: 0 0 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .form-grid { display: grid; gap: 10px; }
-        input, select { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: #fff; outline: none; width: 100%; box-sizing: border-box; }
-        .btn-gold { background: var(--gold); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        .table-responsive { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 10px; color: #555; font-size: 0.7rem; border-bottom: 1px solid var(--border); }
-        td { padding: 12px 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.8rem; }
-        .status-pill { padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; }
-        .pill-pending { background: #333; color: #fff; }
-        .pill-process { background: var(--process); color: #000; }
-        .pill-success { background: var(--success); color: #fff; }
-        .action-btn { padding: 6px 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 5px; color: #fff; }
+        :root {
+            --gold: #d4af37;
+            --blue: #0088ff;
+            --dark: #050505;
+            --card: #0f0f0f;
+            --border: #1a1a1a;
+            --success: #00ffa3;
+            --danger: #ff3e3e;
+        }
+
+        body { 
+            background: var(--dark); 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- OVERLAY LOGIN --- */
+        #gate-keeper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark); z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .terminal-box {
+            background: var(--card); border: 2px solid var(--border);
+            padding: 30px; border-radius: 24px; width: 85%; max-width: 380px;
+            box-shadow: 0 0 50px rgba(0,0,0,1); text-align: center;
+        }
+
+        .terminal-box h1 { font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { font-size: 0.6rem; color: #555; font-weight: bold; margin-left: 5px; }
+
+        input, select { 
+            background: #000; border: 1px solid var(--border); padding: 14px; 
+            border-radius: 12px; color: #fff; width: 100%; box-sizing: border-box; 
+            font-family: 'JetBrains Mono', monospace; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--gold); }
+
+        .btn-core { 
+            background: var(--gold); color: #000; border: none; padding: 15px; 
+            border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; 
+            font-size: 0.9rem; text-transform: uppercase; margin-top: 10px;
+        }
+
+        /* --- MAIN DASHBOARD --- */
+        #main-ui { display: none; padding: 15px; }
+        
+        .header-panel { 
+            background: var(--card); padding: 20px; border-radius: 20px; 
+            border: 1px solid var(--border); display: flex; justify-content: space-between; 
+            align-items: center; margin-bottom: 20px;
+        }
+
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media(min-width: 950px) { .grid-layout { grid-template-columns: 380px 1fr; } }
+
+        .widget { 
+            background: var(--card); border: 1px solid var(--border); 
+            border-radius: 20px; padding: 20px;
+        }
+
+        h2 { font-size: 0.75rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; margin-bottom: 20px; }
+
+        /* --- PRODUCT LIST --- */
+        .p-row {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: #000; border-radius: 12px; margin-bottom: 8px; border: 1px solid #111;
+        }
+        .p-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+        
+        /* --- TABLE STYLE --- */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th { text-align: left; padding: 12px; color: #444; font-size: 0.6rem; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #111; font-size: 0.8rem; vertical-align: middle; }
+
+        .status-tag { padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
+        .tag-pending { background: #1a1a1a; color: #666; }
+        .tag-process { background: rgba(0, 136, 255, 0.15); color: var(--blue); }
+        .tag-success { background: rgba(0, 255, 163, 0.15); color: var(--success); }
+
+        .ctrl-btn { background: #1a1a1a; border: none; color: #fff; padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .ctrl-btn:hover { background: var(--border); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1 style="margin:0; font-size: 1.1rem; color: var(--gold);">RHF ADMIN</h1>
-            <button onclick="location.href='shop.html'" style="background:none; border:1px solid #444; color:#888; padding:5px 10px; border-radius:5px; font-size:0.7rem;">BALIK KE TOKO</button>
-        </header>
-
-        <div class="card">
-            <h2>➕ TAMBAH PRODUK</h2>
-            <div class="form-grid">
-                <input type="text" id="p-name" placeholder="Nama Produk">
-                <input type="number" id="p-price" placeholder="Harga (Contoh: 50000)">
-                <input type="text" id="p-img" placeholder="Link Gambar (URL)">
-                <select id="p-label">
-                    <option value="Biasa">Biasa</option>
-                    <option value="Menengah">Menengah</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Limited">Limited</option>
-                </select>
+    <div id="gate-keeper">
+        <div class="terminal-box">
+            <h1>RHF STORZ</h1>
+            <p style="color: #444; font-size: 0.65rem; margin-bottom: 25px;">CORE SYSTEM ACCESS v4.0</p>
+            
+            <div class="input-group">
+                <label>IDENTITAS ARSITEK</label>
+                <input type="text" id="user-core" placeholder="Masukkan User">
             </div>
-            <button class="btn-gold" onclick="submitProduct()">PUBLIKASIKAN</button>
+            
+            <div class="input-group">
+                <label>KUNCI ENKRIPSI</label>
+                <input type="password" id="pass-core" placeholder="Masukkan Password">
+            </div>
+
+            <button class="btn-core" onclick="verifyAccess()">AUTHORIZE ACCESS</button>
+        </div>
+    </div>
+
+    <div id="main-ui">
+        <div class="header-panel">
+            <div>
+                <h1 style="margin:0; font-size: 1.1rem; font-weight: 900; color: #fff;">COMMAND CENTER</h1>
+                <div style="font-size: 0.6rem; color: var(--success); margin-top: 4px; font-family: 'JetBrains Mono';">● ENCRYPTION ACTIVE</div>
+            </div>
+            <button onclick="exitSystem()" style="background:none; border: 1px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 12px; font-size: 0.7rem; font-weight: 900; cursor: pointer;">EXIT CORE</button>
         </div>
 
-        <div class="card">
-            <h2>📦 DAFTAR TRANSAKSI</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Produk</th>
-                            <th>Total + Unik</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trx-list"></tbody>
-                </table>
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="widget" style="margin-bottom: 15px;">
+                    <h2>Upload New Script</h2>
+                    <input type="text" id="p-name" placeholder="Product Name">
+                    <input type="number" id="p-price" placeholder="Price (Rp)">
+                    <input type="text" id="p-img" placeholder="Image URL">
+                    <select id="p-label">
+                        <option value="Biasa">Label: Biasa</option>
+                        <option value="Menengah">Label: Menengah</option>
+                        <option value="Premium">Label: Premium</option>
+                        <option value="Limited">Label: Limited</option>
+                    </select>
+                    <button class="btn-core" onclick="pushProduct()">DEPLOY TO SHOP</button>
+                </div>
+
+                <div class="widget">
+                    <h2>Live Inventory</h2>
+                    <div id="inventory-list" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                        </div>
+                </div>
+            </div>
+
+            <div class="col-right">
+                <div class="widget">
+                    <h2>Live Transactions Stream</h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Package</th>
+                                    <th>Total + Code</th>
+                                    <th>Status</th>
+                                    <th>Control</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trx-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIG FIREBASE ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
-            authDomain: "rhf-shop.firebaseapp.com",
             databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "rhf-shop",
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- LOAD TRANSAKSI (TANPA PROTEKSI EMAIL) ---
-        function loadTransactions() {
-            db.ref('transactions').on('value', snap => {
-                const list = document.getElementById('trx-list');
+        // --- SECURITY LOGIC ---
+        function verifyAccess() {
+            const u = document.getElementById('user-core').value;
+            const p = document.getElementById('pass-core').value;
+
+            // Kredensial yang kamu minta
+            if(u === "RHF STORZ" && p === "gacoruncek73@gmail.com") {
+                sessionStorage.setItem("rhf_auth", "gacor_v4");
+                bootSystem();
+            } else {
+                alert("AUTENTIKASI GAGAL! PERIKSA KREDENSIAL.");
+            }
+        }
+
+        function bootSystem() {
+            if(sessionStorage.getItem("rhf_auth") === "gacor_v4") {
+                document.getElementById('gate-keeper').style.display = 'none';
+                document.getElementById('main-ui').style.display = 'block';
+                syncInventory();
+                syncTransactions();
+            }
+        }
+
+        // Auto-boot if session exists
+        if(sessionStorage.getItem("rhf_auth") === "gacor_v4") bootSystem();
+
+        // --- INVENTORY ENGINE ---
+        function syncInventory() {
+            db.ref('products').on('value', snap => {
+                const list = document.getElementById('inventory-list');
                 list.innerHTML = '';
                 const data = snap.val();
-                if (!data) {
-                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#444;">Belum ada pesanan.</td></tr>';
-                    return;
-                }
+                if(!data) return list.innerHTML = `<p style="color:#222; font-size:0.7rem;">No data in warehouse.</p>`;
 
-                Object.keys(data).reverse().forEach(key => {
-                    const t = data[key];
+                Object.keys(data).forEach(id => {
+                    const p = data[id];
                     list.innerHTML += `
-                        <tr>
-                            <td><strong>${t.userName}</strong></td>
-                            <td>${t.productName}</td>
-                            <td><strong style="color:var(--gold)">Rp ${t.total.toLocaleString()}</strong><br><small style="color:#555">Kode: ${t.uniqueCode}</small></td>
-                            <td><span class="status-pill pill-${t.status.toLowerCase()}">${t.status}</span></td>
-                            <td>
-                                ${t.status === 'Pending' ? `<button class="action-btn" style="background:var(--process)" onclick="updateStatus('${key}', 'Process')">Proses</button>` : ''}
-                                ${t.status === 'Process' ? `<button class="action-btn" style="background:var(--success)" onclick="updateStatus('${key}', 'Success')">Selesai</button>` : ''}
-                                <button class="action-btn" style="background:var(--danger)" onclick="deleteTrx('${key}')">Del</button>
-                            </td>
-                        </tr>`;
+                        <div class="p-row">
+                            <img src="${p.image}" class="p-thumb" onerror="this.src='https://via.placeholder.com/50'">
+                            <div style="flex:1">
+                                <div style="font-size:0.75rem; font-weight:bold;">${p.name}</div>
+                                <div style="font-size:0.65rem; color:var(--gold);">Rp ${p.price.toLocaleString()}</div>
+                            </div>
+                            <button class="ctrl-btn" onclick="killProduct('${id}')" style="color:var(--danger)">✕</button>
+                        </div>
+                    `;
                 });
             });
         }
 
-        function submitProduct() {
+        function pushProduct() {
             const name = document.getElementById('p-name').value;
             const price = parseInt(document.getElementById('p-price').value);
             const img = document.getElementById('p-img').value;
             const label = document.getElementById('p-label').value;
-            if(!name || !price) return alert("Nama & Harga wajib diisi!");
+            if(!name || !price) return alert("DATA TIDAK LENGKAP!");
 
-            db.ref('products/' + Date.now()).set({
-                id: Date.now(), name, price, image: img, label
-            }).then(() => { alert("Produk Berhasil Ditambah!"); location.reload(); });
+            const pid = "P" + Date.now();
+            db.ref('products/' + pid).set({ id: pid, name, price, image: img, label })
+            .then(() => {
+                alert("DEPLOY BERHASIL!");
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+            });
         }
 
-        function updateStatus(id, stat) { db.ref('transactions/' + id).update({ status: stat }); }
-        function deleteTrx(id) { if(confirm("Hapus pesanan ini?")) db.ref('transactions/' + id).remove(); }
+        function killProduct(id) {
+            if(confirm("HAPUS PRODUK DARI DATABASE?")) db.ref('products/' + id).remove();
+        }
 
-        // Jalankan langsung saat halaman dibuka
-        loadTransactions();
+        // --- TRANSACTION ENGINE ---
+        function syncTransactions() {
+            db.ref('transactions').on('value', snap => {
+                const body = document.getElementById('trx-body');
+                body.innerHTML = '';
+                const data = snap.val();
+                if(!data) return;
+
+                Object.keys(data).reverse().forEach(key => {
+                    const t = data[key];
+                    body.innerHTML += `
+                        <tr>
+                            <td><span style="font-weight:bold;">${t.userName}</span><br><small style="color:#333; font-family: 'JetBrains Mono'; font-size:0.6rem;">#${key.slice(-5)}</small></td>
+                            <td>${t.productName}</td>
+                            <td><strong style="color:var(--gold)">Rp ${t.total.toLocaleString()}</strong><br><small style="color:#222; font-size:0.65rem;">Unik: ${t.uniqueCode}</small></td>
+                            <td><span class="status-tag tag-${t.status.toLowerCase()}">${t.status}</span></td>
+                            <td>
+                                <div style="display:flex; gap:6px;">
+                                    <button class="ctrl-btn" style="color:var(--blue)" onclick="modTrx('${key}', 'Process')">⚙️</button>
+                                    <button class="ctrl-btn" style="color:var(--success)" onclick="modTrx('${key}', 'Success')">✅</button>
+                                    <button class="ctrl-btn" style="opacity:0.3" onclick="killTrx('${key}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function modTrx(id, stat) { db.ref('transactions/' + id).update({ status: stat }); }
+        function killTrx(id) { if(confirm("HAPUS LOG TRANSAKSI?")) db.ref('transactions/' + id).remove(); }
+        function exitSystem() { sessionStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
