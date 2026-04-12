@@ -1,1 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHF STORZ • Digital Marketplace</title>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --text-gray: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .hero span { color: var(--gold); font-weight: 600; }
+
+        /* Product Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* Product Card */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, border 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #222;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-premium { background: var(--gold); color: #000; }
+        .badge-limited { background: #e74c3c; color: #fff; }
+        .badge-normal { background: #34495e; color: #fff; }
+
+        .content { padding: 20px; }
+
+        .content h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--gold);
+        }
+
+        .desc {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+            margin: 10px 0;
+            height: 40px;
+            overflow: hidden;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .price { font-weight: 600; font-size: 1.1rem; }
+        .stock { color: #27ae60; font-size: 0.8rem; }
+
+        .timer {
+            font-size: 0.75rem;
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .rating-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #222;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-buy {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-buy:hover {
+            background: var(--gold);
+            color: #000;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #444;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">RHF STORZ</div>
+        <div id="user-info">
+            <button onclick="login()" id="login-btn" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:8px 20px; border-radius:5px; cursor:pointer;">Login</button>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h2>Koleksi Digital <span>Eksklusif</span></h2>
+        <p style="color: #666;">Aman • Cepat • Terpercaya</p>
+    </div>
+
+    <div class="container">
+        <div class="product-grid" id="product-container">
+            </div>
+    </div>
+
+    <footer>&copy; 2026 RHF STORZ - Built for Reliability</footer>
+
+    <script>
+        // Konfigurasi Firebase (Sudah disesuaikan dengan milikmu)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
+            authDomain: "rhf-shop.firebaseapp.com",
+            databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "rhf-shop",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let userHistory = []; // Untuk menyimpan data histori beli user
+
+        // Fungsi Load Produk
+        async function loadProducts() {
+            const snapshot = await db.ref('products').once('value');
+            const products = snapshot.val();
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+
+            for (let id in products) {
+                const p = products[id];
+                const badgeClass = p.label === 'Premium' ? 'badge-premium' : (p.label === 'Limited' ? 'badge-limited' : 'badge-normal');
+                
+                // Cek apakah user bisa rating (Harus login & ada histori)
+                const canRate = userHistory.includes(id) ? `<span onclick="rate('${id}')" style="cursor:pointer">⭐ Beri Rating</span>` : `<span style="color:#333; font-size:0.7rem">Beli untuk memberi rating</span>`;
+
+                container.innerHTML += `
+                    <div class="card">
+                        <span class="badge ${badgeClass}">${p.label}</span>
+                        <img src="${p.image || 'https://via.placeholder.com/300x200'}" class="product-img">
+                        <div class="content">
+                            <h3>${p.name}</h3>
+                            <p class="desc">${p.description}</p>
+                            ${p.label === 'Limited' ? `<div class="timer" id="timer-${id}">Ending in: ${p.expiry || '24:00:00'}</div>` : ''}
+                            <div class="info-row">
+                                <span class="price">Rp ${p.price.toLocaleString()}</span>
+                                <span class="stock">Stok: ${p.stock}</span>
+                            </div>
+                            <div class="rating-section">
+                                <span style="color:var(--gold)">★ ${p.rating || '5.0'}</span>
+                                | ${canRate}
+                            </div>
+                            <button class="btn-buy" onclick="checkout('${id}')">Beli Sekarang</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Fungsi Login
+        function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        }
+
+        // Pantau Auth & Load History
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                document.getElementById('user-info').innerHTML = `<span>${user.displayName}</span>`;
+                // Ambil histori beli dari database
+                const historySnap = await db.ref('users/' + user.uid + '/history').once('value');
+                if (historySnap.exists()) userHistory = Object.keys(historySnap.val());
+            }
+            loadProducts();
+        });
+
+        function checkout(id) {
+            alert("Sistem Checkout Dialihkan ke WhatsApp/API: " + id);
+            // Integrasi ke API Vercel / Payment bisa ditaruh di sini
+        }
+
+        function rate(id) {
+            const score = prompt("Berikan rating 1-5:");
+            if(score >= 1 && score <= 5) {
+                alert("Terima kasih! Rating " + score + " disimpan.");
+                // Simpan rating ke database logic di sini
+            }
+        }
+    </script>
+</body>
+</html>
 
