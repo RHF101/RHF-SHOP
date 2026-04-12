@@ -1,117 +1,116 @@
 /**
- * RHF STORZ - Shop Logic
- * Menangani rendering produk, filter, dan sistem checkout.
+ * RHF STORZ - Core Shop Logic
+ * Berjalan di sisi Client (Browser)
  */
 
-// State Produk
-let allProducts = {};
+const db = firebase.database();
+const auth = firebase.auth();
+
+// Ambil elemen Grid Produk
+const shopGrid = document.getElementById('shop-grid');
+const loader = document.getElementById('loader');
+
+let allProducts = []; // Tempat menyimpan data produk sementara
 
 /**
- * Fungsi Mengambil Data Produk dari Firebase
+ * 1. AMBIL DATA DARI FIREBASE
  */
-function fetchProducts() {
-    const loader = document.getElementById('loader');
-    if (loader) loader.style.display = 'block';
-
+function loadProducts() {
     db.ref('products').on('value', (snapshot) => {
-        allProducts = snapshot.val();
-        renderProducts(allProducts);
+        const data = snapshot.val();
+        if (data) {
+            // Ubah objek Firebase menjadi Array
+            allProducts = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            }));
+            renderProducts(allProducts);
+        } else {
+            shopGrid.innerHTML = `<p style="color:#555; grid-column: 1/-1; text-align:center;">Belum ada produk yang tersedia.</p>`;
+        }
         if (loader) loader.style.display = 'none';
     }, (error) => {
-        console.error("Gagal mengambil produk:", error);
+        console.error("Gagal ambil produk:", error);
     });
 }
 
 /**
- * Fungsi Render Produk ke Grid HTML
- * @param {Object} products - Objek produk dari Firebase
+ * 2. TAMPILKAN PRODUK KE HTML
  */
 function renderProducts(products) {
-    const grid = document.getElementById('shop-grid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
+    shopGrid.innerHTML = ''; // Bersihkan grid
 
-    if (!products) {
-        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">Belum ada produk yang tersedia.</p>';
-        return;
-    }
-
-    for (let id in products) {
-        const p = products[id];
-        
-        // Penentuan Label/Badge
-        let badgeHTML = '';
-        if (p.label === 'Premium') badgeHTML = '<span class="p-label label-premium">Premium</span>';
-        else if (p.label === 'Limited') badgeHTML = '<span class="p-label label-limited">Limited</span>';
-
-        // Template Card Produk
-        grid.innerHTML += `
-            <div class="p-card">
-                ${badgeHTML}
-                <img src="${p.image || 'https://via.placeholder.com/260x160/111/d4af37?text=RHF+STORZ'}" class="p-img" alt="${p.name}">
-                <h3 class="p-name">${p.name}</h3>
-                <p class="p-desc">${p.description || 'Koleksi digital eksklusif RHF STORZ.'}</p>
-                
-                ${p.label === 'Limited' && p.expiry ? `<div style="font-size:0.7rem; color:#ff4757; margin-bottom:10px; font-weight:bold;">⏳ Berakhir: ${p.expiry}</div>` : ''}
-
-                <div class="p-footer">
-                    <span class="p-price">Rp ${p.price.toLocaleString('id-ID')}</span>
-                    <span class="p-stock">Stok: ${p.stock || 0}</span>
-                </div>
-                
-                <button class="btn-buy" onclick="handlePurchase('${id}', '${p.name}', ${p.price})">
-                    Beli Sekarang
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="badge">${product.label || 'New'}</div>
+            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="price">Rp ${product.price.toLocaleString('id-ID')}</p>
+                <button class="btn-buy" onclick="checkout('${product.id}', '${product.name}', ${product.price})">
+                    BELI SEKARANG
                 </button>
             </div>
         `;
-    }
+        shopGrid.appendChild(card);
+    });
 }
 
 /**
- * Fungsi Filter Kategori
- * @param {string} category - Label kategori (Premium/Limited/Standard/All)
- * @param {HTMLElement} element - Elemen tombol chip yang diklik
+ * 3. SISTEM FILTER KATEGORI
  */
 function filterData(category, element) {
-    // Update UI Chip
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    if (element) element.classList.add('active');
+    // Ubah tampilan tombol filter
+    document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+    element.classList.add('active');
 
     if (category === 'All') {
         renderProducts(allProducts);
     } else {
-        const filtered = {};
-        for (let id in allProducts) {
-            if (allProducts[id].label === category) {
-                filtered[id] = allProducts[id];
-            }
-        }
+        const filtered = allProducts.filter(p => p.label === category);
         renderProducts(filtered);
     }
 }
 
 /**
- * Fungsi Handle Pembelian
- * Mengintegrasikan dengan fungsi processCheckout di app.js
+ * 4. LOGIKA PEMBELIAN (CHECKOUT)
  */
-function handlePurchase(id, name, price) {
-    // Pastikan fungsi processCheckout ada di app.js
-    if (typeof processCheckout === "function") {
-        processCheckout(id, name, price);
-    } else {
-        console.error("Fungsi processCheckout tidak ditemukan di app.js");
-        alert("Sistem sedang maintenance, silakan hubungi admin.");
+function checkout(productId, productName, price) {
+    const user = auth.currentUser;
+
+    if (!user) {
+        alert("Silakan login terlebih dahulu!");
+        return window.location.replace("/");
+    }
+
+    const confirmBuy = confirm(`Konfirmasi pembelian ${productName} seharga Rp ${price.toLocaleString()}?`);
+
+    if (confirmBuy) {
+        const trxId = "TRX-" + Date.now();
+        const dateNow = new Date().toLocaleString('id-ID');
+
+        // Simpan data transaksi ke Firebase
+        db.ref('transactions/' + trxId).set({
+            trxId: trxId,
+            userUid: user.uid,
+            userName: user.displayName,
+            userEmail: user.email,
+            productId: productId,
+            productName: productName,
+            total: price,
+            status: 'Pending', // Tahap 1: Di Proses (Default)
+            date: dateNow
+        }).then(() => {
+            alert("Pesanan dikirim! Silakan hubungi admin untuk pembayaran.");
+            // Scroll otomatis ke bagian tracking
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }).catch(err => {
+            alert("Terjadi kesalahan: " + err.message);
+        });
     }
 }
 
-// Inisialisasi pengambilan data saat halaman siap
-document.addEventListener('DOMContentLoaded', () => {
-    // Tunggu auth siap sebelum ambil data (opsional, tergantung kebijakan proteksi)
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            fetchProducts();
-        }
-    });
-});
-
+// Jalankan pengambilan data saat script dimuat
+loadProducts();
