@@ -3,50 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF CORE V8 • AI COMMAND CENTER</title>
+    <title>RHF SUPREME V11 • AUDIT & NOTIF</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --gold: #d4af37; --blue: #0088ff; --dark: #050505;
-            --card: #0f0f0f; --border: #1a1a1a; --success: #00ffa3; --danger: #ff3e3e; --ai-glow: #00f2ff;
+            --gold: #d4af37; --success: #00ffa3; --danger: #ff3e3e; --dark: #050505;
+            --card: #0f0f0f; --border: #1a1a1a; --ai: #00f2ff;
         }
 
-        body { 
-            background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0;
-            overflow-x: hidden;
-        }
+        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        
+        nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .container { padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 1100px) { .container { grid-template-columns: 350px 1fr; } }
 
-        /* --- AI ASSISTANT FLOAT --- */
-        #ai-terminal {
-            background: #000; border: 1px solid var(--ai-glow); border-radius: 15px;
-            padding: 15px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
-        }
+        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; }
+        h2 { font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 10px; }
 
-        #main-ui { display: none; padding: 15px; }
-        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media(min-width: 1000px) { .grid-layout { grid-template-columns: 450px 1fr; } }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th { text-align: left; padding: 12px; color: #444; border-bottom: 1px solid var(--border); }
+        td { padding: 15px 12px; border-bottom: 1px solid #111; }
 
-        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        h2 { font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 900; font-size: 0.6rem; }
+        .badge-pending { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
+        .badge-success { background: rgba(0, 255, 163, 0.1); color: var(--success); }
 
-        input, select, textarea { 
-            background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; 
-            color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono';
-        }
+        input { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: 'JetBrains Mono'; }
+        .btn-core { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; }
+        .btn-approve { background: var(--success); color: #000; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 900; cursor: pointer; }
 
-        .btn-push { background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: 900; width: 100%; cursor: pointer; }
-        .btn-ai { background: var(--ai-glow); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; }
-
-        /* Transaction List */
-        .trx-card { background: #000; border: 1px solid #111; padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 0.75rem; }
-        .status-pending { color: var(--gold); }
-        .status-success { color: var(--success); }
-
-        #gate-keeper { position: fixed; inset: 0; background: var(--dark); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        #gate-keeper { position: fixed; inset: 0; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -54,59 +44,62 @@
     <div id="gate-keeper">
         <div style="text-align:center; width: 300px;">
             <h1 style="color:var(--gold)">RHF ACCESS</h1>
-            <input type="password" id="sys-pass" placeholder="PASSWORD CORE">
-            <button class="btn-push" onclick="authSys()">ENTER</button>
+            <input type="password" id="sys-pass" placeholder="PASSWORD ADMIN">
+            <button class="btn-core" onclick="authorize()">LOGIN SYSTEM</button>
         </div>
     </div>
 
-    <div id="main-ui">
-        <div id="ai-terminal">
-            <h2 style="color: var(--ai-glow); margin: 0 0 10px 0;">RHF-AI COMMANDER</h2>
-            <p id="ai-response" style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">Menunggu perintah, Arsitek...</p>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="ai-input" placeholder="Contoh: 'Buat deskripsi script bot' atau 'Diskon semua 10%'" style="margin-bottom: 0;">
-                <button class="btn-ai" onclick="runAI()">EXECUTE</button>
+    <nav>
+        <div style="font-weight:900;">RHF<span style="color:var(--gold)">AUDIT</span> V11</div>
+        <div id="sync-status" style="font-size:0.6rem; color:var(--ai)">● MONITORING TRANSACTIONS...</div>
+    </nav>
+
+    <div class="container" id="admin-ui" style="display:none;">
+        <div class="side">
+            <div class="widget">
+                <h2>Total Revenue</h2>
+                <div id="total-rev" style="font-size: 1.8rem; font-weight: 900; font-family: 'JetBrains Mono'; color: var(--success);">Rp 0</div>
+            </div>
+
+            <div class="widget">
+                <h2>Quick Product Deploy</h2>
+                <input type="text" id="p-name" placeholder="Item Name">
+                <input type="number" id="p-price" placeholder="Price">
+                <button class="btn-core" onclick="pushItem()">DEPLOY</button>
+            </div>
+            
+            <div class="widget">
+                <h2>System Settings</h2>
+                <p style="font-size: 0.6rem; color: #444;">Telegram Bot Integration</p>
+                <input type="text" id="tg-token" placeholder="Bot Token">
+                <input type="text" id="tg-id" placeholder="Chat ID">
+                <button class="btn-core" style="background:#222; color:#fff; font-size:0.7rem;" onclick="saveConfig()">SAVE CONFIG</button>
             </div>
         </div>
 
-        <div class="grid-layout">
-            <div class="left">
-                <div class="widget">
-                    <h2>Deploy Asset</h2>
-                    <input type="text" id="p-name" placeholder="Nama Barang">
-                    <input type="number" id="p-price" placeholder="Harga">
-                    <input type="number" id="p-stock" placeholder="Stok">
-                    <input type="text" id="p-img" placeholder="Link Gambar">
-                    <textarea id="p-desc" placeholder="Deskripsi"></textarea>
-                    <select id="p-label">
-                        <option value="Biasa">Biasa</option>
-                        <option value="Premium">Premium</option>
-                        <option value="Limited">Limited</option>
-                    </select>
-                    <button class="btn-push" onclick="pushData()">DEPLOY PRODUCT</button>
-                </div>
-
-                <div class="widget">
-                    <h2>Auto-Verify System</h2>
-                    <p style="font-size: 0.6rem; color: #555;">Masukkan nominal dari mutasi dana untuk verifikasi otomatis.</p>
-                    <input type="number" id="verify-amount" placeholder="Nominal Transfer">
-                    <button class="btn-push" style="background: var(--success); color: #000;" onclick="autoVerify()">VERIFY NOMINAL</button>
-                </div>
-            </div>
-
-            <div class="right">
-                <div class="widget">
-                    <h2>Live Inventory & Stock</h2>
-                    <div id="warehouse-list"></div>
-                </div>
-
-                <div class="widget">
-                    <h2>Pending Transactions</h2>
-                    <div id="transaction-list"></div>
+        <div class="main">
+            <div class="widget">
+                <h2>Master Audit Log</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>TRANSACTION ID</th>
+                                <th>USER / PRODUCT</th>
+                                <th>NOMINAL</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-table"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -117,100 +110,100 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function authSys() {
+        function authorize() {
             if(document.getElementById('sys-pass').value === "gacoruncek73@gmail.com") {
                 document.getElementById('gate-keeper').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'block';
-                loadData();
+                document.getElementById('admin-ui').style.display = 'grid';
+                startAudit();
             }
         }
 
-        // --- AI LOGIC ENGINE ---
-        async function runAI() {
-            const input = document.getElementById('ai-input').value.toLowerCase();
-            const res = document.getElementById('ai-response');
-            res.innerText = "Processing Command...";
-
-            // Fitur AI 1: Pembuat Deskripsi
-            if(input.includes("buat deskripsi")) {
-                const pName = document.getElementById('p-name').value || "Produk";
-                const aiDesc = `[RHF PREMIUM ASSET] ${pName} - High Performance Script. Teruji stabil, fitur anti-delay, dan integrasi API yang mulus. Cocok untuk arsitektur sistem modern.`;
-                document.getElementById('p-desc').value = aiDesc;
-                res.innerText = "AI: Deskripsi profesional telah dibuat untuk " + pName;
-            }
-            
-            // Fitur AI 2: Diskon Massal
-            else if(input.includes("diskon")) {
-                const pct = parseInt(input.replace(/[^0-9]/g, '')) / 100;
-                if(!pct) return res.innerText = "AI: Masukkan angka diskon (contoh: diskon 10)";
-                
-                db.ref('products').once('value', snap => {
-                    snap.forEach(child => {
-                        const newPrice = Math.round(child.val().price * (1 - pct));
-                        db.ref('products/' + child.key).update({ price: newPrice });
-                    });
-                });
-                res.innerText = `AI: Berhasil menerapkan diskon ${pct*100}% ke semua produk!`;
-            }
-            else {
-                res.innerText = "AI: Maaf Arsitek, perintah tidak dikenali. Coba 'buat deskripsi' atau 'diskon'.";
+        // --- NOTIFIKASI TELEGRAM ---
+        function sendTele(msg) {
+            const token = localStorage.getItem('tgToken');
+            const id = localStorage.getItem('tgId');
+            if(token && id) {
+                fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(msg)}`);
             }
         }
 
-        function pushData() {
-            const data = {
-                name: document.getElementById('p-name').value,
-                price: parseInt(document.getElementById('p-price').value),
-                stock: parseInt(document.getElementById('p-stock').value),
-                image: document.getElementById('p-img').value || "https://via.placeholder.com/150",
-                desc: document.getElementById('p-desc').value,
-                label: document.getElementById('p-label').value,
-                timestamp: Date.now()
-            };
-            const newRef = db.ref('products').push();
-            newRef.set({...data, id: newRef.key}).then(() => alert("DEPLY SUCCESS"));
+        function saveConfig() {
+            localStorage.setItem('tgToken', document.getElementById('tg-token').value);
+            localStorage.setItem('tgId', document.getElementById('tg-id').value);
+            alert("Config Saved!");
         }
 
-        function loadData() {
-            // Warehouse Load
-            db.ref('products').on('value', snap => {
-                const list = document.getElementById('warehouse-list');
-                list.innerHTML = '';
-                snap.forEach(c => {
-                    const p = c.val();
-                    list.innerHTML += `
-                        <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>${p.name} (Stok: ${p.stock})</span>
-                            <button onclick="db.ref('products/${c.key}').remove()" style="color:red; background:none; border:none;">Hapus</button>
-                        </div>`;
-                });
+        function startAudit() {
+            // Load Config
+            document.getElementById('tg-token').value = localStorage.getItem('tgToken') || "";
+            document.getElementById('tg-id').value = localStorage.getItem('tgId') || "";
+
+            // Listener Transaksi Baru (Untuk Bunyi Alarm)
+            db.ref('transactions').limitToLast(1).on('child_added', snap => {
+                const data = snap.val();
+                if(Date.now() - data.timestamp < 10000) {
+                    document.getElementById('alert-sound').play();
+                    sendTele(`🔔 PESANAN BARU!\n\nID: #${data.tid}\nUser: ${data.userName}\nItem: ${data.productName}\nTotal: Rp ${data.total.toLocaleString()}`);
+                }
             });
 
-            // Transaction Load
+            // Master List Update
             db.ref('transactions').on('value', snap => {
-                const list = document.getElementById('transaction-list');
-                list.innerHTML = '';
-                snap.forEach(c => {
-                    const t = c.val();
-                    list.innerHTML += `
-                        <div class="trx-card">
-                            <b>${t.userName}</b> - ${t.productName} <br>
-                            <span class="status-${t.status.toLowerCase()}">Rp ${t.total.toLocaleString()} (${t.status})</span>
-                        </div>`;
+                const table = document.getElementById('audit-table');
+                const revDisp = document.getElementById('total-rev');
+                let html = '';
+                let revenue = 0;
+
+                if(!snap.exists()) { table.innerHTML = "<tr><td colspan='6' style='text-align:center'>No Data</td></tr>"; return; }
+
+                const items = [];
+                snap.forEach(c => { items.push(c.val()); });
+                items.reverse();
+
+                items.forEach(t => {
+                    if(t.status === 'Success') revenue += t.total;
+                    const isPending = t.status === 'Pending';
+
+                    html += `
+                        <tr>
+                            <td style="color:#444; font-size:0.6rem;">${new Date(t.timestamp).toLocaleTimeString()}</td>
+                            <td style="font-weight:900; color:var(--gold)">#${t.tid}</td>
+                            <td>
+                                <b>${t.userName}</b><br>
+                                <span style="font-size:0.6rem; color:#666;">${t.productName}</span>
+                            </td>
+                            <td style="font-family:'JetBrains Mono';">
+                                <b>Rp ${t.total.toLocaleString()}</b><br>
+                                <small style="color:#444">Code: ${t.uniqueCode}</small>
+                            </td>
+                            <td><span class="badge badge-${t.status.toLowerCase()}">${t.status}</span></td>
+                            <td>
+                                ${isPending ? `<button class="btn-approve" onclick="approve('${t.tid}', ${t.total})">APPROVE</button>` : `<b style="color:var(--success)">DONE</b>`}
+                            </td>
+                        </tr>
+                    `;
                 });
+
+                table.innerHTML = html;
+                revDisp.innerText = "Rp " + revenue.toLocaleString();
             });
         }
 
-        function autoVerify() {
-            const amount = parseInt(document.getElementById('verify-amount').value);
-            db.ref('transactions').once('value', snap => {
-                snap.forEach(c => {
-                    if(c.val().total === amount && c.val().status === 'Pending') {
-                        db.ref('transactions/' + c.key).update({ status: 'Success' });
-                        alert("Berhasil Konfirmasi Transaksi: " + c.key);
-                    }
+        function approve(tid, total) {
+            if(confirm(`Konfirmasi saldo masuk Rp ${total.toLocaleString()}?`)) {
+                db.ref('transactions/' + tid).update({ status: 'Success' }).then(() => {
+                    sendTele(`✅ SALDO TERBUKTI MASUK!\n\nID: #${tid}\nTotal: Rp ${total.toLocaleString()}\nStatus: Sukses Lolos Audit.`);
                 });
-            });
+            }
+        }
+
+        function pushItem() {
+            const name = document.getElementById('p-name').value;
+            const price = parseInt(document.getElementById('p-price').value);
+            if(name && price) {
+                db.ref('products').push().set({ name, price, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                alert("Product Deployed!");
+            }
         }
     </script>
 </body>
