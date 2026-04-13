@@ -3,214 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHF CORE V10 • SUPREME AUDIT</title>
-    
+    <title>RHF STORZ • GATEWAY</title>
+
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
-    
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --gold: #d4af37; --success: #00ffa3; --danger: #ff3e3e; --dark: #050505;
-            --card: #0f0f0f; --border: #1a1a1a; --ai: #00f2ff;
+            --gold: #d4af37; --dark: #050505; --border: #1a1a1a;
         }
 
-        body { 
-            background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; 
-            margin: 0; padding: 0; overflow-x: hidden;
+        body {
+            background: var(--dark); color: #fff; font-family: 'Inter', sans-serif;
+            margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
+            overflow: hidden;
         }
 
-        /* --- UI NAVIGATION --- */
-        nav { 
-            background: var(--card); border-bottom: 1px solid var(--border); 
-            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+        .gate-card {
+            background: #0f0f0f; border: 1px solid var(--border);
+            padding: 40px; border-radius: 30px; text-align: center;
+            width: 90%; max-width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .container { padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media(min-width: 1100px) { .container { grid-template-columns: 400px 1fr; } }
+        h1 { font-weight: 900; letter-spacing: -2px; margin-bottom: 5px; font-size: 2.5rem; }
+        h1 span { color: var(--gold); }
+        p { color: #555; font-size: 0.8rem; margin-bottom: 30px; }
 
-        .widget { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; }
-        h2 { font-size: 0.7rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
-
-        /* --- DATA TABLES --- */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { text-align: left; padding: 12px; color: #555; border-bottom: 1px solid var(--border); }
-        td { padding: 15px 12px; border-bottom: 1px solid #111; }
-
-        /* --- STATUS BADGES --- */
-        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 900; }
-        .badge-pending { background: rgba(212, 175, 55, 0.1); color: var(--gold); }
-        .badge-success { background: rgba(0, 255, 163, 0.1); color: var(--success); }
-
-        /* --- INTERACTIVE --- */
-        input, select, textarea { 
-            background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 10px; 
-            color: #fff; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: 'JetBrains Mono';
+        .btn-main {
+            background: #fff; color: #000; border: none; padding: 18px;
+            width: 100%; border-radius: 15px; font-weight: 900;
+            cursor: pointer; text-transform: uppercase; margin-bottom: 12px;
+            transition: 0.3s; font-size: 0.8rem;
         }
-        .btn-core { 
-            background: var(--gold); color: #000; border: none; padding: 15px; border-radius: 12px; 
-            font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase;
-        }
-        .btn-approve { 
-            background: var(--success); color: #000; border: none; padding: 8px 12px; 
-            border-radius: 8px; font-weight: 900; font-size: 0.65rem; cursor: pointer;
-        }
+        .btn-main:hover { transform: scale(1.02); background: var(--gold); }
 
-        #gate-keeper { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .btn-guest {
+            background: transparent; color: var(--gold); border: 1px solid var(--gold);
+            padding: 15px; width: 100%; border-radius: 15px; font-weight: 700;
+            cursor: pointer; font-size: 0.75rem; transition: 0.3s;
+        }
+        .btn-guest:hover { background: rgba(212, 175, 55, 0.1); }
+
+        .user-active {
+            margin-top: 20px; padding: 15px; border-radius: 15px;
+            background: #151515; display: none; align-items: center; gap: 10px;
+        }
+        .user-active img { width: 30px; height: 30px; border-radius: 50%; }
+
+        #loader { font-family: 'JetBrains Mono'; color: var(--gold); font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
-    <div id="gate-keeper">
-        <div style="text-align:center; width: 320px;">
-            <h1 style="font-weight:900; color:var(--gold); letter-spacing:-1px;">RHF SUPREME</h1>
-            <input type="password" id="sys-pass" placeholder="SECURITY KEY">
-            <button class="btn-core" onclick="auth()">AUTHORIZE ACCESS</button>
+    <div class="gate-card">
+        <h1>RHF<span>STORZ</span></h1>
+        <p>Premium Architectural Digital Assets</p>
+
+        <div id="auth-ui">
+            <div id="loader">INITIALIZING SYSTEM...</div>
         </div>
-    </div>
-
-    <nav>
-        <div style="font-weight:900; letter-spacing: 1px;">RHF<span style="color:var(--gold)">AUDIT</span></div>
-        <div id="live-indicator" style="font-size:0.6rem; color:var(--success)">● LIVE SYNC ACTIVE</div>
-    </nav>
-
-    <div class="container" id="main-content" style="display:none;">
         
-        <div class="sidebar">
-            <div class="widget">
-                <h2>Deploy New Asset</h2>
-                <input type="text" id="p-name" placeholder="Product Name">
-                <input type="number" id="p-price" placeholder="Base Price (IDR)">
-                <input type="text" id="p-img" placeholder="Image URL">
-                <textarea id="p-desc" placeholder="Asset Description"></textarea>
-                <button class="btn-core" onclick="deployProduct()">PUSH TO WAREHOUSE</button>
-            </div>
-
-            <div class="widget" style="margin-top:20px;">
-                <h2>Total Revenue</h2>
-                <div id="revenue-total" style="font-size:1.8rem; font-weight:900; font-family:'JetBrains Mono';">Rp 0</div>
-                <p style="font-size:0.6rem; color:#444; margin-top:5px;">SUM OF ALL SUCCESSFUL TRANSACTIONS</p>
-            </div>
+        <div style="margin-top: 40px;">
+            <a href="admin.html" style="color: #111; text-decoration: none; font-size: 0.6rem;">ADMIN ACCESS</a>
         </div>
-
-        <div class="main-panel">
-            <div class="widget">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h2>Master Transaction Audit</h2>
-                    <button onclick="refreshData()" style="background:none; border:1px solid #333; color:#555; padding:5px 10px; border-radius:5px; font-size:0.6rem; cursor:pointer;">RE-SYNC DATA</button>
-                </div>
-                
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TIME</th>
-                                <th>TID / USER</th>
-                                <th>PRODUCT</th>
-                                <th>TOTAL (NOMINAL)</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="audit-body">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCVqKwHmRBxWu5hjulwmhradnGbp0yFhbY",
+            authDomain: "rhf-shop.firebaseapp.com",
             databaseURL: "https://rhf-shop-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "rhf-shop",
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
 
-        function auth() {
-            if(document.getElementById('sys-pass').value === "gacoruncek73@gmail.com") {
-                document.getElementById('gate-keeper').style.display = 'none';
-                document.getElementById('main-content').style.display = 'grid';
-                initAuditSystem();
-            } else { alert("WRONG KEY"); }
-        }
-
-        function deployProduct() {
-            const name = document.getElementById('p-name').value;
-            const price = parseInt(document.getElementById('p-price').value);
-            if(!name || !price) return alert("Fill data!");
-
-            db.ref('products').push().set({
-                name, price, 
-                image: document.getElementById('p-img').value || "https://via.placeholder.com/150",
-                desc: document.getElementById('p-desc').value,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                alert("DEPLOYED!");
-                location.reload();
-            });
-        }
-
-        function initAuditSystem() {
-            // Read Transactions
-            db.ref('transactions').on('value', snap => {
-                const tbody = document.getElementById('audit-body');
-                const revDisplay = document.getElementById('revenue-total');
-                let html = '';
-                let revenue = 0;
-
-                if(!snap.exists()) { tbody.innerHTML = "<tr><td colspan='6'>No records found.</td></tr>"; return; }
-
-                const data = [];
-                snap.forEach(c => { data.push(c.val()); });
-                data.reverse(); // Newest first
-
-                data.forEach(t => {
-                    const isPending = t.status === 'Pending';
-                    if(t.status === 'Success') revenue += t.total;
-
-                    html += `
-                        <tr>
-                            <td style="font-size:0.6rem; color:#444;">${new Date(t.timestamp).toLocaleString()}</td>
-                            <td>
-                                <div style="font-weight:900; color:var(--gold)">#${t.tid}</div>
-                                <div style="font-size:0.65rem; color:#666;">${t.userName}</div>
-                            </td>
-                            <td style="font-size:0.7rem;">${t.productName}</td>
-                            <td style="font-family:'JetBrains Mono'; font-weight:bold;">
-                                Rp ${t.total.toLocaleString()}
-                                <div style="font-size:0.5rem; color:#444;">(Code: ${t.uniqueCode})</div>
-                            </td>
-                            <td><span class="badge badge-${t.status.toLowerCase()}">${t.status}</span></td>
-                            <td>
-                                ${isPending ? `<button class="btn-approve" onclick="approveTrx('${t.tid}')">APPROVE</button>` : `<span style="color:var(--success); font-size:1.2rem;">✓</span>`}
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                tbody.innerHTML = html;
-                revDisplay.innerText = "Rp " + revenue.toLocaleString();
-            });
-        }
-
-        function approveTrx(tid) {
-            if(confirm(`Konfirmasi saldo masuk untuk TID: ${tid}?`)) {
-                db.ref('transactions/' + tid).update({
-                    status: 'Success',
-                    verifiedAt: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    console.log(`TID ${tid} VERIFIED.`);
-                });
+        // 1. CEK STATUS LOGIN
+        auth.onAuthStateChanged(user => {
+            const ui = document.getElementById('auth-ui');
+            if (user) {
+                // Jika sudah login
+                ui.innerHTML = `
+                    <div class="user-active" style="display:flex;">
+                        <img src="${user.photoURL}" alt="U">
+                        <div style="text-align:left">
+                            <div style="font-weight:900; font-size:0.75rem;">${user.displayName}</div>
+                            <div style="font-size:0.6rem; color:#555;">Verified Member</div>
+                        </div>
+                    </div>
+                    <button class="btn-main" style="margin-top:15px;" onclick="window.location.href='shop.html'">ENTER SHOP</button>
+                    <button onclick="auth.signOut()" style="background:none; border:none; color:#444; font-size:0.6rem; cursor:pointer; margin-top:10px;">LOGOUT ACCOUNT</button>
+                `;
+            } else {
+                // Jika Guest
+                ui.innerHTML = `
+                    <button class="btn-main" onclick="loginGoogle()">LOGIN WITH GOOGLE</button>
+                    <button class="btn-guest" onclick="window.location.href='shop.html'">CONTINUE AS GUEST</button>
+                `;
             }
-        }
+        });
 
-        function refreshData() { location.reload(); }
+        // 2. FUNGSI LOGIN
+        function loginGoogle() {
+            auth.signInWithPopup(provider).then(() => {
+                window.location.href = "shop.html";
+            }).catch(err => alert(err.message));
+        }
     </script>
 </body>
 </html>
