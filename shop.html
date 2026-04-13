@@ -88,15 +88,13 @@
     <nav>
         <div style="font-weight: 900; letter-spacing: 1px;">RHF<span style="color:var(--gold)">STORZ</span></div>
         <div class="user-profile" id="user-info">
-            <span id="user-name">Guest Mode</span>
-            <img id="user-pic" src="https://via.placeholder.com/32" alt="">
-        </div>
+            </div>
     </nav>
 
     <div class="container">
         <div class="hero">
             <h1>PREMIUM <span>ASSETS</span></h1>
-            <p style="color:var(--dim); font-size: 0.8rem;">Browse our collection. Login to unlock access.</p>
+            <p style="color:var(--dim); font-size: 0.8rem;">Browse our collection. No key required to browse.</p>
         </div>
 
         <div class="grid" id="product-list"></div>
@@ -115,20 +113,22 @@
 
         let currentUser = null;
 
-        // 1. AUTH LOGIC (MODIFIKASI: IZINKAN GUEST LIHAT BARANG)
+        // 1. SILENT AUTH (Gak maksa redirect, cuma ngecek status)
         auth.onAuthStateChanged(user => {
             const userInfo = document.getElementById('user-info');
 
             if (user) {
+                // Cek status ban
                 db.ref('users/' + user.uid).on('value', snap => {
                     const userData = snap.val();
                     if (userData && userData.access === 'banned') {
-                        alert("AKSES DITOLAK: Akun Anda diblokir oleh Admin.");
+                        alert("BANNED: Akses pembelian dicabut.");
                         auth.signOut();
                         location.reload();
                         return;
                     }
 
+                    // Update log aktif
                     db.ref('users/' + user.uid).update({
                         name: user.displayName,
                         email: user.email,
@@ -137,21 +137,21 @@
                     });
 
                     currentUser = user;
-                    document.getElementById('user-name').innerText = user.displayName;
-                    document.getElementById('user-pic').src = user.photoURL;
+                    userInfo.innerHTML = `
+                        <span id="user-name">${user.displayName}</span>
+                        <img id="user-pic" src="${user.photoURL}" alt="">
+                    `;
                 });
             } else {
                 currentUser = null;
-                userInfo.innerHTML = `
-                    <button class="btn-login" onclick="window.location.href='index.html'">Login / Join</button>
-                `;
+                userInfo.innerHTML = `<button class="btn-login" onclick="window.location.href='index.html'">LOGIN TO PURCHASE</button>`;
             }
             
             document.getElementById('loader').style.display = 'none';
             loadProducts();
         });
 
-        // 2. LIVE INVENTORY SYNC (TERBUKA UNTUK PUBLIK)
+        // 2. LIVE DATA (Terbuka untuk siapa saja)
         function loadProducts() {
             db.ref('products').on('value', snap => {
                 const list = document.getElementById('product-list');
@@ -166,7 +166,7 @@
                         <div class="card">
                             <img src="${p.image || 'https://via.placeholder.com/300'}" alt="Item">
                             <h3>${p.name}</h3>
-                            <p>${p.desc || 'No description available.'}</p>
+                            <p>${p.desc || 'Premium asset by RHF.'}</p>
                             <div class="price-tag">Rp ${p.price.toLocaleString()}</div>
                             <button class="btn-buy" onclick="checkout('${child.key}', '${p.name}', ${p.price})">Purchase</button>
                         </div>
@@ -176,43 +176,33 @@
             });
         }
 
-        // 3. SECURE CHECKOUT (HANYA UNTUK YANG LOGIN)
+        // 3. SECURE CHECKOUT (Hanya terkunci saat mau transaksi)
         async function checkout(id, name, price) {
-            // PROTEKSI: Jika belum login, tawarkan login
             if (!currentUser) {
-                const wantLogin = confirm("Anda harus Login terlebih dahulu untuk melakukan pembelian.\n\nKe halaman Login?");
-                if(wantLogin) window.location.href = "index.html";
+                if(confirm("Butuh login untuk memproses transaksi. Ke halaman login?")) {
+                    window.location.href = "index.html";
+                }
                 return;
             }
 
-            const methodCode = prompt("PILIH METODE PEMBAYARAN:\n1. DANA\n2. OVO\n3. GOPAY\n\n(Ketik Angka 1, 2, atau 3)");
-            
+            const methodCode = prompt("PILIH METODE PEMBAYARAN:\n1. DANA\n2. OVO\n3. GOPAY");
             let methodName = "";
             if(methodCode === "1") methodName = "DANA";
             else if(methodCode === "2") methodName = "OVO";
             else if(methodCode === "3") methodName = "GOPAY";
-            else { alert("Pilihan tidak valid!"); return; }
+            else { alert("Pilihan batal/salah."); return; }
 
             const tid = "TID-" + Math.random().toString(36).substr(2, 9).toUpperCase();
             const uniqueCode = Math.floor(Math.random() * 899) + 100;
             const finalTotal = price + uniqueCode;
 
-            if(confirm(`Konfirmasi Pesanan:\nItem: ${name}\nMetode: ${methodName}\nTotal: Rp ${finalTotal.toLocaleString()}`)) {
-                const txData = {
-                    tid: tid,
-                    userId: currentUser.uid,
-                    userName: currentUser.displayName,
-                    userEmail: currentUser.email,
-                    productName: name,
-                    method: methodName,
-                    basePrice: price,
-                    uniqueCode: uniqueCode,
-                    total: finalTotal,
-                    status: 'Pending',
+            if(confirm(`Konfirmasi Beli ${name} via ${methodName}?`)) {
+                await db.ref('transactions/' + tid).set({
+                    tid, userId: currentUser.uid, userName: currentUser.displayName,
+                    userEmail: currentUser.email, productName: name, method: methodName,
+                    basePrice: price, uniqueCode, total: finalTotal, status: 'Pending',
                     timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-
-                await db.ref('transactions/' + tid).set(txData);
+                });
                 window.location.href = `nota.html?tid=${tid}`;
             }
         }
