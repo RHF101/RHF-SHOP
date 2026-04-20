@@ -1,0 +1,33 @@
+{
+    "name": "Tokogame",
+    "short_name": "Tokogame",
+    "theme_color": "#05CE78",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "orientation": "portrait",
+    "start_url": "/",
+    "description": "Top Up Games dan Digital Voucher Murah, Cepat, dan Terpercaya. Tempat top up games dan voucher harga termurah, tercepat, dan teraman. Beli Diamond Mobile Legends ML, Free Fire (FF) Diamonds DM, Ragnarok Origin Berry, HDI MD, Genshin Impact, Royal Play, Boss Domino, Call of Duty CODM, PUBG Mobile UC, Garena Shells, Steam dengan diskon dan harga promo terbaik dan banyak bonus!",
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-256x256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "prefer_related_applications": false
+}

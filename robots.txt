@@ -1,0 +1,13 @@
+User-Agent: *
+Disallow: /id-id/digital/order
+Disallow: /id-id/digital/[id]
+Disallow: /id-id/topbos
+Disallow: /posts/[slug]
+Disallow: /id-id/posts/[slug]
+Disallow: /tags/[tagName]
+Disallow: /submit.html
+Disallow: /about.html
+
+
+Allow: /
+Sitemap: https://www.tokogame.com/sitemap.xml
